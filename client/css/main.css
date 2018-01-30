@@ -1,0 +1,26 @@
+body {
+	margin: 0;
+}
+
+#canvas {
+	border: 1px solid black;
+}
+
+#chatbox {
+	width  : 500px;
+	height : calc(100px + 1.5em);
+}
+
+#chatarea {
+	width      : 500px;
+	height     : 100px;
+	overflow-y : scroll;
+	overflow-x : none;
+}
+
+#chatinput {
+	width      : 500px;
+	height     : 1.5em;
+	overflow-y : none;
+	overflow-x : scroll;
+}
