@@ -189,8 +189,8 @@ io.sockets.on("connection", function(socket) {
 
 setInterval(() => {
 	var pack = {
-		player: Player.update(),
-		bullet: Bullet.update(),
+		player: Player.update()
+// 		bullet: Bullet.update(),
 	}
 	
 	for(let i in SOCKET_LIST){
