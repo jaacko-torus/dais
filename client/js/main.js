@@ -34,14 +34,6 @@ socket.on("newPositions", function(data) {
 			data.player[i].y
 		);
 	}
-	
-// 	for(let i = 0; i < data.bullet.length; i++) {
-// 		ctx.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
-// 	}
-});
-
-socket.on("test", function(data) {
-	console.log(data);
 });
 
 document.onkeydown = function(e) {

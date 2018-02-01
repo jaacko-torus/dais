@@ -61,23 +61,20 @@ var Player = function(id) {
 	}
 	
 	self.updateSpd = function() {
-		switch(true) {
-		case self.pressing.left:
-			self.spdX = -self.maxSpd;
-			break;
-		case self.pressing.up:
-			self.spdY = -self.maxSpd;
-			break;
-		case self.pressing.right:
-			self.spdX = self.maxSpd;
-			break;
-		case self.pressing.down:
-			self.spdY = self.maxSpd;
-			break;
-		default:
-			self.spdX = 0;
-			self.spdY = 0;
-		}
+		if( self.pressing.left  ) { self.spdX = -self.maxSpd; }
+		if( self.pressing.up    ) { self.spdY = -self.maxSpd; }
+		if( self.pressing.right ) { self.spdX =  self.maxSpd; }
+		if( self.pressing.down  ) { self.spdY =  self.maxSpd; }
+		
+		if(!(
+				self.pressing.left  ||
+				self.pressing.up    ||
+				self.pressing.right ||
+				self.pressing.down
+				)) {
+						self.spdX = 0;
+						self.spdY = 0;
+					 }
 	}
 	
 	Player.list[id] = self;
@@ -89,19 +86,26 @@ Player.list = {};
 Player.onConnect = function(socket) {
 	var player = Player(socket.id);
 	socket.on("keyPress", function(data) {
+//		~bug
+//		the next four lines should work fine and substitue the switch statement but it doesn't
+//		if( data.inputId = "left"  ) { player.pressing.left  = data.state };
+//		if( data.inputId = "up"    ) { player.pressing.up    = data.state };
+//		if( data.inputId = "right" ) { player.pressing.right = data.state };
+//		if( data.inputId = "down"  ) { player.pressing.down  = data.state };
+		
 		switch(data.inputId) {
-		case "left":
-			player.pressing.left = data.state;
-			break;
-		case "up":
-			player.pressing.up = data.state;
-			break;
-		case "right":
-			player.pressing.right = data.state;
-			break;
-		case "down":
-			player.pressing.down = data.state;
-			break;
+			case "left":
+				player.pressing.left = data.state;
+				break;
+			case "up":
+				player.pressing.up = data.state;
+				break;
+			case "right":
+				player.pressing.right = data.state;
+				break;
+			case "down":
+				player.pressing.down = data.state;
+				break;
 		}
 	});
 }
@@ -125,48 +129,8 @@ Player.update = function() {
 	return pack;
 }
 
-
-var Bullet = function(angle) {
-	var self = Entity();
-	
-	self.id = Math.random();
-	self.spdX = Math.cos(angle / 180 * Math.PI) * 10;
-	self.spdY = Math.sin(angle / 180 * Math.PI) * 10;
-	
-	self.timer = 0;
-	self.toRemove = false;
-	
-	var super_update = self.update;
-	self.update = function() {
-		if(self.timer++ > 100)
-			self.toRemove = true;
-		super_update();
-	}
-	Bullet.list[self.id] = self;
-	return self;
-}
-
-Bullet.list = {};
-
-Bullet.update = function() {
-	if(Math.random() < 0.1){
-		Bullet(Math.random() * 360);
-	}
-	
-	var pack = [];
-	for(let i in Bullet.list){
-		var bullet = Bullet.list[i];
-		
-		bullet.update();
-		pack.push({
-			x: bullet.x,
-			y: bullet.y,
-		});
-	}
-	return pack;
-};
-
 var io = require("socket.io")(server, {});
+
 io.sockets.on("connection", function(socket) {
 	socket.id = Math.random();
 	SOCKET_LIST[socket.id] = socket;
@@ -190,11 +154,10 @@ io.sockets.on("connection", function(socket) {
 setInterval(() => {
 	var pack = {
 		player: Player.update()
-// 		bullet: Bullet.update(),
 	}
 	
 	for(let i in SOCKET_LIST){
 		var socket = SOCKET_LIST[i];
 		socket.emit("newPositions", pack);
 	}
-}, 1000/40);
+}, 1000/30);
