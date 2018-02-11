@@ -6,6 +6,9 @@
   "version": "0.0.1",
   "description": "following tutorial",
   "main": "app.js",
+	"engines": {
+    "node": "9.5.0"
+  },
   "scripts": {
     "start": "node app.js"
   },
@@ -13,16 +16,10 @@
     "express": "^4.15.2",
     "socket.io": "^2.0.3"
   },
-  "engines": {
-    "node": "6.10.x"
-  },
   "repository": {
-    "url": "https://glitch.com/edit/#!/welcome-project"
+    "url": "https://github.com/jaacko-torus/dais.git"
   },
   "license": "MIT",
   "keywords": [
-    "node",
-    "glitch",
-    "express"
   ]
 }
