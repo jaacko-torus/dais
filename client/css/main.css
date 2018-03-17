@@ -1,26 +1,30 @@
-body {
+* {
 	margin: 0;
 }
 
 #canvas {
-	border: 1px solid black;
+	display: block;
+/* 	border: 1px solid black; */
 }
 
 #chatbox {
-	width  : 500px;
-	height : calc(100px + 1.5em);
+	width: 0;
+	width  : 800px;
+	height : calc(100px + 25px);
 }
 
 #chatarea {
-	width      : 500px;
+	width: 0;
+	width      : 800px;
 	height     : 100px;
 	overflow-y : scroll;
 	overflow-x : none;
 }
 
 #chatinput {
-	width      : 500px;
-	height     : 1.5em;
+	width: 0;
+	width      : 800px;
+	height     : 25px;
 	overflow-y : none;
 	overflow-x : scroll;
 }

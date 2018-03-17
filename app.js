@@ -1,3 +1,9 @@
+/* debug */
+
+const DEBUG = true;
+
+/* routing */
+
 var express = require("express");
 var app = express();
 var server = require("http").Server(app);
@@ -11,153 +17,154 @@ app.use(express.static("client"));
 server.listen(process.env.PORT || 8080);
 console.log("Server started.");
 
-function testOnClient(event, data) {
-	for(let i in SOCKET_LIST){
-		var socket = SOCKET_LIST[i];
-		socket.emit(event, data);
-	}
-}
 
-var SOCKET_LIST = {};
+// ------------------------------------------------------------
 
-var Entity = function() {
-	var self = {
-		id   : "",
-		x    : 250,
-		y    : 250,
-		spdX : 0,
-		spdY : 0,
-	}
-	
-	self.update = function() {
-		self.updatePosition();
-	}
-	
-	self.updatePosition = function() {
-		self.x += self.spdX;
-		self.y += self.spdY;
-	}
-	return self;
-}
 
-var Player = function(id) {
-	var self = Entity();
-	
-	self.id = id;
-	self.number = Math.floor(10 * Math.random());
-	self.maxSpd = 10;
+/* classes */
 
-	self.pressing = {
-		left  : false,
-		up    : false,
-		right : false,
-		down  : false
-	};
-	
-	var super_update = self.update;
-	self.update = function() {
-		self.updateSpd();
-		super_update();
-	}
-	
-	self.updateSpd = function() {
-		if( self.pressing.left  ) { self.spdX = -self.maxSpd; }
-		if( self.pressing.up    ) { self.spdY = -self.maxSpd; }
-		if( self.pressing.right ) { self.spdX =  self.maxSpd; }
-		if( self.pressing.down  ) { self.spdY =  self.maxSpd; }
+class entity {
+	constructor(x = 16, y = 16, spd_x = 0, spd_y = 0) {
+		this.x = x;
+		this.y = y;
 		
-		if(!(
-				self.pressing.left  ||
-				self.pressing.up    ||
-				self.pressing.right ||
-				self.pressing.down
-				)) {
-						self.spdX = 0;
-						self.spdY = 0;
-					 }
+		this.spd_x = spd_x;
+		this.spd_y = spd_y;
+		
+		this.size = 16;
 	}
 	
-	Player.list[id] = self;
-	return self;
+	update() {
+		this.update_position();
+	}
+	
+	update_position() {
+		this.x += this.spd_x;
+		this.y += this.spd_y;
+	}
 }
 
-Player.list = {};
+var PLAYER_LIST = {};
 
-Player.onConnect = function(socket) {
-	var player = Player(socket.id);
-	socket.on("keyPress", function(data) {
-//		~bug
-//		the next four lines should work fine and substitue the switch statement but it doesn't
-//		if( data.inputId = "left"  ) { player.pressing.left  = data.state };
-//		if( data.inputId = "up"    ) { player.pressing.up    = data.state };
-//		if( data.inputId = "right" ) { player.pressing.right = data.state };
-//		if( data.inputId = "down"  ) { player.pressing.down  = data.state };
+class player extends entity {
+	constructor(x, y, spd_x, spd_y) {
+		super(x, y, spd_x, spd_y);
+		this.maxSpd = 16;
 		
-		switch(data.inputId) {
-			case "left":
-				player.pressing.left = data.state;
-				break;
-			case "up":
-				player.pressing.up = data.state;
-				break;
-			case "right":
-				player.pressing.right = data.state;
-				break;
-			case "down":
-				player.pressing.down = data.state;
-				break;
-		}
-	});
-}
-
-Player.onDisconnect = function(socket) {
-	delete Player.list[socket.id];
-}
-
-Player.update = function() {
-	var pack = [];
-	for(let i in Player.list){
-		var player = Player.list[i];
+		this.pressing = {
+			left  : false,
+			up    : false,
+			right : false,
+			down  : false
+		};
+	}
+	
+	update() {
+		this.update_spd();
+		super.update();
+	}
+	
+	update_spd() {
+		if( this.pressing.left  ) { this.spd_x = -this.maxSpd }
+		if( this.pressing.up    ) { this.spd_y = -this.maxSpd }
+		if( this.pressing.right ) { this.spd_x =  this.maxSpd }
+		if( this.pressing.down  ) { this.spd_y =  this.maxSpd }
 		
-		player.update();
-		pack.push({
-			x      : player.x,
-			y      : player.y,
-			number : player.number
+		if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
+		if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
+	}
+	
+	on_connect(socket, id) {
+		PLAYER_LIST[id] = this;
+		
+		socket.on("key_press", (data) => {
+			if( data.input_id === "left"  ) { this.pressing.left  = data.state }
+			if( data.input_id === "up"    ) { this.pressing.up    = data.state }
+			if( data.input_id === "right" ) { this.pressing.right = data.state }
+			if( data.input_id === "down"  ) { this.pressing.down  = data.state }
 		});
+		
+		socket.emit("connection", { id, msg: `Your session id is now: ${id}` });
+		Object.defineProperty(this, "sent_id", { value: true, writable: false });
 	}
-	return pack;
+	
+	on_disconnect(id) {
+		delete PLAYER_LIST[id];
+	}
 }
+
+
+// ------------------------------------------------------------
+
+
+/* sockets */
 
 var io = require("socket.io")(server, {});
 
+function on(event, data) { io.emit(event, data) }
+
 io.sockets.on("connection", function(socket) {
-	socket.id = Math.random();
-	SOCKET_LIST[socket.id] = socket;
+	let id = socket.id;
+	let p  = new player();
 	
-	Player.onConnect(socket);
+	p.on_connect(socket, id);
 	
-	socket.on("disconnect", function() {
-		delete SOCKET_LIST[socket.id];
-		Player.onDisconnect(socket);
+	socket.on("disconnect", () => {
+		p.on_disconnect(id);
 	});
 	
-	socket.on("sendMsgToServer", function(data) {
-		var playerName = socket.id;
-		
-		for(let i in SOCKET_LIST) {
-			SOCKET_LIST[i].emit("addToChat", playerName + ": " + data);
+	socket.on("send_msg_to_server", (data) => {
+		if(data.from.id === id && data.msg[0] !== "/") {  // if user has matching credentials
+			//  if user has a name & it matches provided name, then broadcast message
+			if(  p.name && data.from.name === p.name ) { socket.broadcast.emit("add_to_chat", { from: {name: p.name}, msg: data.msg }) }
+			if(  p.name && data.from.name !== p.name ) {  //  if user has a name & it doesn't match provided name, then tell them they can't do that and refuse to send message
+				          socket.emit("add_to_chat", { from: {name:      "/", id: "/" }, msg: "You can't change your name!",        my_name: p.name });
+			}
+			if( !p.name ) {  //  if name hasn't been set, then set the name and send message
+				Object.defineProperty(p, "name", { value: data.from.name, writable: false });
+				          socket.emit("add_to_chat", {  from: { name:    "/", id: "/" }, msg: `Your session name is now: ${p.name}`, my_name: p.name });
+				socket.broadcast.emit("add_to_chat", {  from: { name: p.name          }, msg: data.msg });
+			}
 		}
+		
+		if(data.from.id !== p.id) // disconnect
+		
+		exec_debug(socket, p, data); // run command
 	});
 });
 
-setInterval(() => {
-	var pack = {
-		player: Player.update()
+function exec_debug(socket, p, data) {
+	if( DEBUG === true && data.msg[0] === "/" ) {
+		socket.emit("add_to_chat", {from: {name: "/", id: "/"}, msg:"You have issued a command"});
+		return eval(data.msg.substr(1));
+	}
+}
+function emit_debug(socket, p, data) { socket.emit("debug", data.msg) }
+
+
+// ------------------------------------------------------------
+
+
+/* packages */
+
+function update_pckgs() {
+	let pack = {};
+	
+	for(let player in PLAYER_LIST) {
+		PLAYER_LIST[player].update();
+		
+		pack[player] = {
+			x    : PLAYER_LIST[player].x,
+			y    : PLAYER_LIST[player].y,
+			size : PLAYER_LIST[player].size
+		};
 	}
 	
-	for(let i in SOCKET_LIST){
-		var socket = SOCKET_LIST[i];
-		socket.emit("newPositions", pack);
-	}
-}, 1000/30);
+	return pack;
+}
+
+setInterval(() => {
+	var pack = update_pckgs();
+	
+	io.emit("update", pack);
+}, ( 1000/8 ) );

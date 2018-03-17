@@ -1,3 +1,7 @@
+# Description
+
+I have a bad memory, so I just save all the comands for later use.
+
 # nvm
 
 To download nvm on Ubuntu:
@@ -56,4 +60,35 @@ Uploading all progress:
 $ git add -A
 $ git commit -am "message"
 $ git push origin master
+```
+
+# Heroku
+
+Install Heroku through npm (update once in a while)
+```
+$ npm install -g heroku-cli
+$ heroku --version
+```
+
+Loging in to Heroku
+```
+$ heroku login
+```
+
+Create your app
+```
+$ heroku create <name of app>
+```
+
+Deploying to Heroku through git
+```
+$ git add -A
+$ git commit -am "message"
+$ git push heroku master
+```
+
+Ensure app is running:
+```
+$ heroku git:remote -a <name of app>
+$ heroku ps:scale web=1
 ```
