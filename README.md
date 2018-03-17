@@ -15,4 +15,4 @@ Loop #2 will be a simulation of the whole game(not just around certain players).
 
 ## Changelog
 
-The changelog can be found [`here`](README.md)
+The changelog can be found [`here`](CHANGELOG.md)
