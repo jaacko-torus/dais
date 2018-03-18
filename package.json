@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "The free multiplayer 2D Orthogonal RPG",
   "main": "app.js",
-	"engines": {
+  "engines": {
     "node": "9.8.0"
   },
   "scripts": {
@@ -17,6 +17,5 @@
     "url": "https://github.com/jaacko-torus/dais.git"
   },
   "license": "MIT",
-  "keywords": [
-  ]
+  "keywords": []
 }
