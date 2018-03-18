@@ -24,7 +24,7 @@ console.log("Server started.");
 /* classes */
 
 class entity {
-	constructor(x = 16, y = 16, spd_x = 0, spd_y = 0) {
+	constructor(x = 1, y = 1, spd_x = 0, spd_y = 0) {
 		this.x = x;
 		this.y = y;
 		
@@ -49,7 +49,7 @@ var PLAYER_LIST = {};
 class player extends entity {
 	constructor(x, y, spd_x, spd_y) {
 		super(x, y, spd_x, spd_y);
-		this.maxSpd = 16;
+		this.spd = 1;
 		
 		this.pressing = {
 			left  : false,
@@ -65,10 +65,10 @@ class player extends entity {
 	}
 	
 	update_spd() {
-		if( this.pressing.left  ) { this.spd_x = -this.maxSpd }
-		if( this.pressing.up    ) { this.spd_y = -this.maxSpd }
-		if( this.pressing.right ) { this.spd_x =  this.maxSpd }
-		if( this.pressing.down  ) { this.spd_y =  this.maxSpd }
+		if( this.pressing.left  ) { this.spd_x = -this.spd }
+		if( this.pressing.up    ) { this.spd_y = -this.spd }
+		if( this.pressing.right ) { this.spd_x =  this.spd }
+		if( this.pressing.down  ) { this.spd_y =  this.spd }
 		
 		if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
 		if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
@@ -136,7 +136,7 @@ io.sockets.on("connection", function(socket) {
 function exec_debug(socket, p, data) {
 	if( DEBUG === true && data.msg[0] === "/" ) {
 		socket.emit("add_to_chat", {from: {name: "/", id: "/"}, msg:"You have issued a command"});
-		return eval(data.msg.substr(1));
+		return eval(data.substr(1));
 	}
 }
 function emit_debug(socket, p, data) { socket.emit("debug", data.msg) }

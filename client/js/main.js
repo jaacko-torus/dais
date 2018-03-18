@@ -88,10 +88,10 @@ const draw = {
 		for( let player in PLAYER_LIST ) {
 			if( PLAYER_LIST[player] && data[player] ) {
 				ctx.fillRect(
-					PLAYER_LIST[player].x - PLAYER_LIST[player].size,
-					PLAYER_LIST[player].y - PLAYER_LIST[player].size,
-					PLAYER_LIST[player].size,
-					PLAYER_LIST[player].size
+					( PLAYER_LIST[player].size * PLAYER_LIST[player].x ) - PLAYER_LIST[player].size,
+					( PLAYER_LIST[player].size * PLAYER_LIST[player].y ) - PLAYER_LIST[player].size,
+					  PLAYER_LIST[player].size,
+					  PLAYER_LIST[player].size
 				);
 			}
 		}
@@ -156,15 +156,15 @@ socket.on("update", function(data) {
 
 
 document.onkeydown = function(e) {
-	if(e.keyCode === 37 || e.keyCode === 65) { socket.emit("key_press", { input_id: "left"  , state:  true }) } // A or left
-	if(e.keyCode === 38 || e.keyCode === 87) { socket.emit("key_press", { input_id: "up"    , state:  true }) } // W or up
-	if(e.keyCode === 39 || e.keyCode === 68) { socket.emit("key_press", { input_id: "right" , state:  true }) } // D or right
-	if(e.keyCode === 40 || e.keyCode === 83) { socket.emit("key_press", { input_id: "down"  , state:  true }) } // S or down
+	if(e.keyCode === 37 || e.keyCode === 65) { socket.emit("key_press", { input_id: "left"  , state:  true }); } // A or left
+	if(e.keyCode === 38 || e.keyCode === 87) { socket.emit("key_press", { input_id: "up"    , state:  true }); } // W or up
+	if(e.keyCode === 39 || e.keyCode === 68) { socket.emit("key_press", { input_id: "right" , state:  true }); } // D or right
+	if(e.keyCode === 40 || e.keyCode === 83) { socket.emit("key_press", { input_id: "down"  , state:  true }); } // S or down
 };
 
 document.onkeyup = function(e) {
-	if(e.keyCode === 37 || e.keyCode === 65) { socket.emit("key_press", { input_id: "left"  , state: false }) } // A or left
-	if(e.keyCode === 38 || e.keyCode === 87) { socket.emit("key_press", { input_id: "up"    , state: false }) } // W or up
-	if(e.keyCode === 39 || e.keyCode === 68) { socket.emit("key_press", { input_id: "right" , state: false }) } // D or right
-	if(e.keyCode === 40 || e.keyCode === 83) { socket.emit("key_press", { input_id: "down"  , state: false }) } // S or down
+	if(e.keyCode === 37 || e.keyCode === 65) { socket.emit("key_press", { input_id: "left"  , state: false }); } // A or left
+	if(e.keyCode === 38 || e.keyCode === 87) { socket.emit("key_press", { input_id: "up"    , state: false }); } // W or up
+	if(e.keyCode === 39 || e.keyCode === 68) { socket.emit("key_press", { input_id: "right" , state: false }); } // D or right
+	if(e.keyCode === 40 || e.keyCode === 83) { socket.emit("key_press", { input_id: "down"  , state: false }); } // S or down
 };
