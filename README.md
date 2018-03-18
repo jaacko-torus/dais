@@ -3,6 +3,10 @@
 
 Starting script is `app.js`.
 
+## DEBUG
+
+In `app.js` the const `DEBUG = false` by default. This means that you will be able to type `/<command>`, `<command>` being replaced by javascript which will be `eval`ed in the server. This is done so that it is easier to debug the server. To send back information from the server to the client use `debug_emit(socket, p, { msg: <command> })`. It is so long and explicit so that the client notices less that the function exists.
+
 ## Plan
 
 `app.js` will have two loops:

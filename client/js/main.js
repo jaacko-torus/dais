@@ -30,6 +30,8 @@ class entity {
 		this.y    =    y;
 		this.size = size;
 	}
+// 	set size( size ) { var size = size }
+// 	get size() { return size }
 }
 
 var PLAYER_LIST = {};

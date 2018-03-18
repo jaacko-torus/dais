@@ -1,6 +1,6 @@
 /* debug */
 
-const DEBUG = true;
+const DEBUG = false;
 
 /* routing */
 
@@ -135,7 +135,7 @@ io.sockets.on("connection", function(socket) {
 
 function exec_debug(socket, p, data) {
 	if( DEBUG === true && data.msg[0] === "/" ) {
-		socket.emit("add_to_chat", {from: {name: "/", id: "/"}, msg:"You have issued a command"});
+		socket.emit("add_to_chat", { from: { name: "/", id: "/" }, msg: "You have issued a command" });
 		return eval(data.substr(1));
 	}
 }
