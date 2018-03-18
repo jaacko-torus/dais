@@ -92,3 +92,5 @@ Ensure app is running:
 $ heroku git:remote -a <name of app>
 $ heroku ps:scale web=1
 ```
+
+App will be found in `https://<app name>.herokuapp.com/`
