@@ -16,6 +16,8 @@ These are the categories which the whole
 - Server
 - SocketIO
 
+A `+` at the beginning represents higher priority.
+
 Keep the use of the `&&` operand to a minimum
 
 ## Unreleased
@@ -31,6 +33,7 @@ Keep the use of the `&&` operand to a minimum
 ### Remove
 
 ### Fix
+- `+` Graphics: When changing `I.img`, the only change should be seen in the player, not in others.
 - Graphics: Adding unnecesary image references. Some references point to nothing.
 
 ### Security

@@ -138,13 +138,18 @@ const draw = {
 			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
 			
 			if( PLAYER_LIST[player] && data[player] && atlas.player.loaded ) {
+				let player_image;
+				
+				if( player === I.id ) { player_image = I.img }
+				if( player !== I.id ) { player_image =     0 }
+				
 				ctx.drawImage(
 					atlas.player,
-					img.player[I.img].x,
-					img.player[I.img].y,
-					img.player[I.img].size,
-					img.player[I.img].size,
-					
+					img.player[player_image].x,
+					img.player[player_image].y,
+					img.player[player_image].size,
+					img.player[player_image].size,
+
 					( I.size * PLAYER_LIST[player].x ) - I.size,
 					( I.size * PLAYER_LIST[player].y ) - I.size,
 					I.size,
@@ -173,7 +178,6 @@ socket.on("connection", function(data) {
 	I.size = data.size;
 	
 	load_all_atlas();
-// 	load_all_images();
 	console.info(data.msg);
 });
 
