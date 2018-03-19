@@ -41,7 +41,11 @@ Keep the use of the `&&` operand to a minimum
 
 
 
-## `0.2.0` - 2018-17-3
+## `0.3.0` - 2018-19-3
+
+
+
+## `0.2.0` - 2018-19-3
 ### Added
 - Graphics: for player
 - Graphics: load all images in so that they are easily accesible
