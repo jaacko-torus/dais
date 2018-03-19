@@ -28,12 +28,13 @@ Keep the use of the `&&` operand to a minimum
 ### Change
 - Object -> `entity`: make size a static property
 
+- SocketIO `&&` Graphics: transmit the image a user is displaying to other
+
 ### Deprecate
 
 ### Remove
 
 ### Fix
-- `+` Graphics: When changing `I.img`, the only change should be seen in the player, not in others.
 - Graphics: Adding unnecesary image references. Some references point to nothing.
 
 ### Security
@@ -46,6 +47,9 @@ Keep the use of the `&&` operand to a minimum
 - Graphics: load all images in so that they are easily accesible
 
 - Grid: numerical grid, to not use multiples of 16
+
+### Fix
+- `+` Graphics: When changing `I.img`, the only change should be seen in the player, not in others.
 
 ### Security
 - Object -> `player`: CHANGE `I.name` to `writable: false`
