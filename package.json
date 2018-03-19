@@ -1,21 +1,27 @@
 {
-  "name": "the-dais",
-  "version": "0.1.0",
-  "description": "The free multiplayer 2D Orthogonal RPG",
-  "main": "app.js",
-  "engines": {
-    "node": "9.8.0"
-  },
-  "scripts": {
-    "start": "node app.js"
-  },
-  "dependencies": {
-    "express": "^4.15.2",
-    "socket.io": "^2.0.3"
-  },
-  "repository": {
-    "url": "https://github.com/jaacko-torus/dais.git"
-  },
-  "license": "MIT",
-  "keywords": []
+	"name": "the-dais",
+	"version": "0.1.0",
+	"description": "The free multiplayer 2D Orthogonal RPG",
+	"main": "app.js",
+	"engines": {
+		"node": "9.8.0"
+	},
+	"scripts": {
+		"start"  : "node app.js",
+		
+		"git"    : "git add -A && git commit -am 'new update'",
+		"push"   : "git push origin master | git push heroku master",
+		
+		"nvm"    : "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash",
+		"heroku" : "npm install -g heroku-cli"
+	},
+	"dependencies": {
+		"express": "^4.15.2",
+		"socket.io": "^2.0.3"
+	},
+	"repository": {
+		"url": "https://github.com/jaacko-torus/dais.git"
+	},
+	"license": "MIT",
+	"keywords": []
 }

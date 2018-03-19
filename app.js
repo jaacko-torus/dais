@@ -84,11 +84,16 @@ class player extends entity {
 			if( data.input_id === "down"  ) { this.pressing.down  = data.state }
 		});
 		
-		socket.emit("connection", { id, msg: `Your session id is now: ${id}` });
+		socket.emit("connection", {
+			id   : id,
+			size : this.size,
+			msg  : `Your session id is now: ${id}`
+		});
 		Object.defineProperty(this, "sent_id", { value: true, writable: false });
 	}
 	
-	on_disconnect(id) {
+	on_disconnect(socket, id) {
+		if( this.name ) { socket.broadcast.emit("add_to_chat", { from: { name: "/", id: "/" }, msg: `${this.name} has ended their session` }) }
 		delete PLAYER_LIST[id];
 	}
 }
@@ -110,7 +115,7 @@ io.sockets.on("connection", function(socket) {
 	p.on_connect(socket, id);
 	
 	socket.on("disconnect", () => {
-		p.on_disconnect(id);
+		p.on_disconnect(socket, id);
 	});
 	
 	socket.on("send_msg_to_server", (data) => {

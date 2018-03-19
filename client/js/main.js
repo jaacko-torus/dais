@@ -18,6 +18,51 @@ ctx.font = "30px Arial";
 
 var PLAYER_LIST = [];
 
+var atlas = {
+	map    : { src: "./img/map.png", add_width: 1, add_height: 1 },
+	player : { src: "./img/player.png", add_height: 1 }
+};
+
+var img = {};
+
+function load_all_atlas() {
+	for(let name in atlas) {
+		let src = atlas[name].src;
+		let add_width  = atlas[name].add_width;
+		let add_height = atlas[name].add_height;
+		
+		atlas[name] = new Image();
+		atlas[name].onload = function() {
+			this.loaded = true;
+			this.sub_image_size = 16;
+			
+			if( add_width  ) { this.width  += add_width  }
+			if( add_height ) { this.height += add_height }
+			
+			load_all_images();
+		}
+		
+		atlas[name].src = src;
+	}
+}
+
+function load_all_images() {
+	for(let name in atlas) {
+		img[name] = [];
+		let size = atlas[name].sub_image_size;
+		
+		for(let y = 0; y < atlas[name].height; y += size + 1) {
+			for(let x = 0; x < atlas[name].width; x += size + 1) {
+				img[name].push({
+					size : atlas[name].sub_image_size,
+					x,
+					y
+				});
+			}
+		}
+	}
+}
+
 
 // ------------------------------------------------------------
 
@@ -58,7 +103,9 @@ class player extends entity {
 // ------------------------------------------------------------
 
 
-var I = {};
+var I = {
+	img: 0
+};
 
 const draw = {
 	world(data) {
@@ -70,16 +117,16 @@ const draw = {
 		for(let i = 0; i <= 50; i++) {
 			ctx.beginPath();
 			ctx.setLineDash([2, 2])
-			ctx.moveTo( i * 16 - 0.25, 0      - 0.25 );
-			ctx.lineTo( i * 16 - 0.25, 800    - 0.25 );
+			ctx.moveTo( i * I.size - 0.25, 0      - 0.25 );
+			ctx.lineTo( i * I.size - 0.25, 800    - 0.25 );
 			ctx.lineWidth = 0.5;
 			ctx.strokeStyle = "#cfcfcf";
 			ctx.stroke();
 			
 			ctx.beginPath();
 			ctx.setLineDash([2, 2])
-			ctx.moveTo( 0      - 0.25, i * 16 - 0.25);
-			ctx.lineTo( 800    - 0.25, i * 16 - 0.25);
+			ctx.moveTo( 0      - 0.25, i * I.size - 0.25 );
+			ctx.lineTo( 800    - 0.25, i * I.size - 0.25 );
 			ctx.lineWidth = 0.5;
 			ctx.strokeStyle = "#cfcfcf";
 			ctx.stroke();
@@ -88,12 +135,20 @@ const draw = {
 	
 	players(data) {
 		for( let player in PLAYER_LIST ) {
-			if( PLAYER_LIST[player] && data[player] ) {
-				ctx.fillRect(
-					( PLAYER_LIST[player].size * PLAYER_LIST[player].x ) - PLAYER_LIST[player].size,
-					( PLAYER_LIST[player].size * PLAYER_LIST[player].y ) - PLAYER_LIST[player].size,
-					  PLAYER_LIST[player].size,
-					  PLAYER_LIST[player].size
+			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
+			
+			if( PLAYER_LIST[player] && data[player] && atlas.player.loaded ) {
+				ctx.drawImage(
+					atlas.player,
+					img.player[I.img].x,
+					img.player[I.img].y,
+					img.player[I.img].size,
+					img.player[I.img].size,
+					
+					( I.size * PLAYER_LIST[player].x ) - I.size,
+					( I.size * PLAYER_LIST[player].y ) - I.size,
+					I.size,
+					I.size
 				);
 			}
 		}
@@ -104,9 +159,9 @@ function player_list_update(data) {
 	//  loop through `data`        . If the player is not in `PLAYER_LIST` and is     in `data` , then create a new player
 	//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is not in `data` , then delete it
 	//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is     in `data` , then update & draw players
-	for( let id in data        ) { if( !PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = new player(data[id].x, data[id].y, data[id].size); } }
-	for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] && !data[id] ) { delete PLAYER_LIST[id] ;                                          continue; } }
-	for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = data[id];                                          } }
+	for( let id in data        ) { if( !PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = new player(data[id].x, data[id].y); } }
+	for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] && !data[id] ) { delete PLAYER_LIST[id] ;                           continue; } }
+	for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = data[id];                           } }
 }
 
 
@@ -114,14 +169,18 @@ var socket = io();
 
 
 socket.on("connection", function(data) {
-	I.id = data.id;
+	Object.defineProperty(I, "id", { value: data.id, writable: false });
+	I.size = data.size;
+	
+	load_all_atlas();
+// 	load_all_images();
 	console.info(data.msg);
 });
 
 
 socket.on("add_to_chat", function(data) {
 	chat.area.innerHTML += `<div id="${data}">${data.from.name}: ${data.msg}` + "</div>";
-
+// 	alert(`you have received a new message from: ${data.from.name}`);
 	if( data.my_name ) {
 		I.name = data.my_name;
 		console.info(data.msg);

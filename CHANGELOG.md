@@ -20,22 +20,34 @@ Keep the use of the `&&` operand to a minimum
 
 ## Unreleased
 
-## `0.2.0` - 2018-17-3
 ### Add
-- Grid: numerical grid to not use multiples of 16
-
-- Graphics: graphics to player
+- Graphics: for map
 
 ### Change
+- Object -> `entity`: make size a static property
 
 ### Deprecate
 
 ### Remove
 
 ### Fix
+- Graphics: Adding unnecesary image references. Some references point to nothing.
+
+### Security
+
+
+
+## `0.2.0` - 2018-17-3
+### Added
+- Graphics: for player
+- Graphics: load all images in so that they are easily accesible
+
+- Grid: numerical grid, to not use multiples of 16
 
 ### Security
 - Object -> `player`: CHANGE `I.name` to `writable: false`
+
+
 
 ## `0.1.0` - 2018-17-3
 ### Added
