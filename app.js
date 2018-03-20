@@ -2,16 +2,14 @@
 
 const DEBUG = false;
 
-/* routing */
-
-// var express = require('express');
-// var app     = express();
-// var server  = require('http').createServer(app);
-// var io      = require('socket.io').listen(server);
+/* dependencies */
 
 var express = require("express");
-var app = express();
-var server = require("http").Server(app);
+var app     = express();
+var server  = require("http").createServer(app);
+var io      = require("socket.io").listen(server);
+
+/* routing */
 
 app.get("/", function(req, res) {
 	res.sendFile( __dirname + "/client/index.html" );
@@ -145,10 +143,6 @@ class player extends entity {
 
 
 /* sockets */
-
-var io = require("socket.io")(server, {});
-
-function on(event, data) { io.emit(event, data) }
 
 io.sockets.on("connection", function(socket) {
 	let id = socket.id;

@@ -22,6 +22,7 @@ Keep the use of the `&&` operand to a minimum
 
 ## `Unreleased`
 ### Add
+- Graphics: first camera
 
 ### Change
 - Graphics: make `x:0,y:0` to be the center of canvas instead of top left corner
