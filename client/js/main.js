@@ -7,8 +7,8 @@ const chat = {
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-canvas.width  = 800;// document.body.clientWidth;
-canvas.height = 800;// document.body.clientHeight;
+canvas.width  = 336;// document.body.clientWidth;
+canvas.height = 336;// document.body.clientHeight;
 
 ctx.font = "30px Arial";
 
@@ -103,14 +103,38 @@ class player extends entity {
 // ------------------------------------------------------------
 
 
-var I = {
-	img: 0
-};
+var world = {};
+var I = { img : 0 };
 
 const draw = {
 	world(data) {
-		this.grid();
+		this.map();
+// 		this.grid();
 		this.players(data);
+	},
+	
+	map() {
+		for(let l = 0; l < world.map.length; l++) {
+			for(let x = 0; x < world.size; x++) {
+				for(let y = 0; y < world.size; y++) {
+					if(atlas.map.loaded && world.map[l] && world.map[l][x] && world.map[l][x][y]) {
+						ctx.drawImage(
+							atlas.map,
+							
+							img.map[world.map[l][x][y]].x,
+							img.map[world.map[l][x][y]].y,
+							img.map[world.map[l][x][y]].size,
+							img.map[world.map[l][x][y]].size,
+							
+							I.size * x,
+							I.size * y,
+							I.size,
+							I.size
+						);
+					}
+				}
+			}
+		}
 	},
 	
 	grid() {
@@ -142,16 +166,17 @@ const draw = {
 				
 				if( player === I.id ) { player_image = I.img }
 				if( player !== I.id ) { player_image =     0 }
-				
+// 				console.log(I.img)
 				ctx.drawImage(
 					atlas.player,
+					
 					img.player[player_image].x,
 					img.player[player_image].y,
 					img.player[player_image].size,
 					img.player[player_image].size,
-
-					( I.size * PLAYER_LIST[player].x ) - I.size,
-					( I.size * PLAYER_LIST[player].y ) - I.size,
+					
+					I.size * PLAYER_LIST[player].x - I.size,
+					I.size * PLAYER_LIST[player].y - I.size,
 					I.size,
 					I.size
 				);
@@ -176,10 +201,15 @@ var socket = io();
 socket.on("connection", function(data) {
 	Object.defineProperty(I, "id", { value: data.id, writable: false });
 	I.size = data.size;
+	I.img  = data.img;
+	
+	world = data.world;
 	
 	load_all_atlas();
 	console.info(data.msg);
 });
+
+socket.on("new_map", function(data) { world = data.world });
 
 
 socket.on("add_to_chat", function(data) {

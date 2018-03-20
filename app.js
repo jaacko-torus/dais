@@ -1,8 +1,13 @@
 /* debug */
 
-const DEBUG = false;
+const DEBUG = true;
 
 /* routing */
+
+// var express = require('express');
+// var app     = express();
+// var server  = require('http').createServer(app);
+// var io      = require('socket.io').listen(server);
 
 var express = require("express");
 var app = express();
@@ -21,15 +26,53 @@ console.log("Server started.");
 // ------------------------------------------------------------
 
 
+/* world methods */
+
+var world = {
+	size: 21,
+	make(width, height, layer, socket) {
+		this.map = [];
+		
+// 		let img;
+// 		if( layer === 1 ) { img = 5 }
+// 		if( layer  >= 1 ) { img = undefined }
+		
+		for(let l = 0; l < layer; l++) {
+			this.map.push([])
+			for(let y = 0; y < height; y++) {
+				this.map[l].push([]);
+				for(let x = 0; x < width; x++) {
+					this.map[0][y].push( 5 );
+					if(l) { this.map[l][y].push( undefined ) }
+				}
+			}
+		}
+		
+		if( socket ) { socket.emit("new_map", this.map) }
+		return this.map;
+	},
+	find(x, y) {
+		return this.map[y - 1][x - 1];
+	}
+};
+
+
+
+// ------------------------------------------------------------
+
+
+
 /* classes */
 
 class entity {
-	constructor(x = 1, y = 1, spd_x = 0, spd_y = 0) {
+	constructor(img, x = 1, y = 1, spd_x = 0, spd_y = 0) {
 		this.x = x;
 		this.y = y;
 		
 		this.spd_x = spd_x;
 		this.spd_y = spd_y;
+		
+		this.img = img;
 		
 		this.size = 16;
 	}
@@ -47,8 +90,9 @@ class entity {
 var PLAYER_LIST = {};
 
 class player extends entity {
-	constructor(x, y, spd_x, spd_y) {
-		super(x, y, spd_x, spd_y);
+	constructor(x, y, spd_x, spd_y, img = 0) {
+		super(img, x, y, spd_x, spd_y);
+		
 		this.spd = 1;
 		
 		this.pressing = {
@@ -85,9 +129,11 @@ class player extends entity {
 		});
 		
 		socket.emit("connection", {
-			id   : id,
-			size : this.size,
-			msg  : `Your session id is now: ${id}`
+			world : { map: world.make(world.size, world.size, 3), size: world.size },
+			id    : id,
+			size  : this.size,
+			img   : this.img,
+			msg   : `Your session id is now: ${id}`
 		});
 		Object.defineProperty(this, "sent_id", { value: true, writable: false });
 	}
