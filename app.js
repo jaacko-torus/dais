@@ -1,6 +1,6 @@
 /* debug */
 
-const DEBUG = true;
+const DEBUG = false;
 
 /* routing */
 
@@ -32,10 +32,6 @@ var world = {
 	size: 21,
 	make(width, height, layer, socket) {
 		this.map = [];
-		
-// 		let img;
-// 		if( layer === 1 ) { img = 5 }
-// 		if( layer  >= 1 ) { img = undefined }
 		
 		for(let l = 0; l < layer; l++) {
 			this.map.push([])
