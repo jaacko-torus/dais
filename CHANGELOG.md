@@ -5,19 +5,19 @@ The Security title must include another title after the category name to specify
 	- Category: TITLE description
 
 These are the categories which the whole 
-- Canvas
-- Canvas -> `camera`:
-- Canvas -> `graphics`:
-- Canvas -> `grid`:
-- Canvas -> `map`:
-- Chat
-- Client
-- Debug
-- Express
-- Object -> `entity`
-- Object -> `player`
-- Server
-- SocketIO
+- `canvas`
+- `canvas -> camera`
+- `canvas -> graphics`
+- `canvas -> grid`
+- `canvas -> map`
+- `chat`
+- `client`
+- `debug`
+- `express`
+- `object -> entity`
+- `object -> player`
+- `server`
+- `socketIO`
 
 A `+` at the beginning represents higher priority.
 
@@ -27,18 +27,17 @@ Keep the use of the `&&` operand to a minimum
 ### Add
 
 ### Change
-- Object -> `entity`: make size a static property.
-- Object -> `player`: `update` function should be part of each player instead of being a global.
+- `object -> entity`: make size a static property.
+- `object -> player`: `player_list_update()` function should be part of each player instead of being a global.
 
-- Server: I don't need to send information to clients all the time, only when thet move. Remove the `setTimeout` in favour of something more efficient.
+- `server`: I don't need to send information to clients all the time, only when they move. Remove the `setTimeout` in favour of something more efficient.
 
 ### Deprecate
 
 ### Remove
 
 ### Fix
-- Canvas -> `camera`: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
-- Canvas -> `graphics`: Adding unnecesary image references. Some references point to nothing.
+- `canvas -> camera`: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
 
 ### Security
 
@@ -46,42 +45,45 @@ Keep the use of the `&&` operand to a minimum
 
 ## `0.3.0` - 2018-22-3
 ### Added
-- Canvas -> `camera`: first.
-- Canvas -> `graphics`: for map.
-- Canvas -> `graphics`: change `y` values so that up is positive and down is negative.
+- `canvas -> camera`: first.
+- `canvas -> graphics`: for map.
+- `canvas -> graphics`: change `y` values so that up is positive and down is negative.
 
 ### Changed
-- Debug: `DEBUG` is now transmited from server to client to make debugging easier.
+- `debug`: `DEBUG` is now transmited from server to client to make debugging easier.
 
-- Object -> `player`: starting position is `x:0, y:0`.
+- `object -> player`: starting position is `x:0, y:0`.
 
-- Server `&&` Canvas -> `graphics`: define the graphics in `I`.
+- `server && canvas -> graphics`: define the graphics in `I`.
+
+## Fix
+- `canvas -> graphics`: Adding unnecesary image references. Some references point to nothing.
 
 
 
 ## `0.2.0` - 2018-19-3
 ### Added
-- Canvas -> `graphics`: for player.
-- Canvas -> `graphics`: load all images in so that they are easily accesible.
-- Canvas -> `grid`: numerical grid, to not use multiples of 16.
+- `canvas -> graphics`: for player.
+- `canvas -> graphics`: load all images in so that they are easily accesible.
+- `canvas -> grid`: numerical grid, to not use multiples of 16.
 
 ### Fix
-- `+` Canvas -> `graphics`: When changing `I.img`, the only change should be seen in the player, not in others.
+- `+ canvas -> graphics`: When changing `I.img`, the only change should be seen in the player, not in others.
 
 ### Security
-- Object -> `player`: CHANGE `I.name` to `writable: false`.
+- `Object -> player`: CHANGE `I.name` to `writable: false`.
 
 
 
 ## `0.1.0` - 2018-17-3
 ### Added
-- Chat: named users.
-- Chat: users can't change their name.
-- Chat: delivered the user id to user so that users can identify themselves in `PLAYER_LIST`.
+- `chat`: named users.
+- `chat`: users can't change their name.
+- `chat`: delivered the user id to user so that users can identify themselves in `PLAYER_LIST`.
 
-- Canvas -> `grid`: added first.
+- `canvas -> grid`: added first.
 
 ### Changed
-- Canvas -> `graphics`: users are now seen as black boxes instead of numbers on a screen.
+- `canvas -> graphics`: users are now seen as black boxes instead of numbers on a screen.
 
-- Object -> `player`: now using ES6 Classes.
+- `object -> player`: now using ES6 Classes.

@@ -215,15 +215,19 @@ function camera(data) {
 	var camera_size = 5;
 	
 	var world_center = (world.size - 1) * I.size / 2;
-	var camera_area = ((5 - 1) * I.size / 2);
+	var camera_area  = (5          - 1) * I.size / 2;
 	
 	if( px <= world_center + camera_area && px >= world_center - camera_area ) { x = 0 }
 	if( py <= world_center + camera_area && py >= world_center - camera_area ) { y = 0;}
 	
-	if( px > world_center + camera_area ) { x = ( world_center + camera_area) - px }
-	if( px < world_center - camera_area ) { x = ( world_center - camera_area) - px }
-	if( py > world_center + camera_area ) { y = (-world_center - camera_area) + py }
-	if( py < world_center - camera_area ) { y = (-world_center + camera_area) + py }
+	
+	// instead of starting on world center, try to start in player location, which by default is `world_center`
+// 	if( px >  world_center + camera_area ) { x =  (world_center + camera_area) - px }
+// 	if( px <  world_center - camera_area ) { x =  (world_center - camera_area) - px }
+// 	if( py >  world_center + camera_area ) { y = -(world_center + camera_area) + py }
+// 	if( py <  world_center - camera_area ) { y = -(world_center - camera_area) + py }
+	
+	if( px >  world_center + camera_area ) { x =  (world_center + camera_area) - px }
 	
 	ctx.translate(x, y);
 	
