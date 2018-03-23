@@ -86,7 +86,7 @@ class player extends entity {
 		super(x, y, size);
 	}
 	
-	static update(data) {
+	static update(data) { // ~bug: this isn;t working yet
 		//  loop through `data`        . If the player is not in `PLAYER_LIST` and is     in `data` , then create a new player
 		//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is not in `data` , then delete it
 		//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is     in `data` , then update & draw players
@@ -104,13 +104,18 @@ class player extends entity {
 
 
 var world = {};
-var I = { img : 0 };
+var I = {
+	img : 0,
+	get position() { return `${this.x}, ${this.y}` }
+};
 
 const draw = {
 	world(data) {
-		this.map();
-// 		this.grid();
-		this.players(data);
+// 		this.map();
+		camera(data);
+		this.grid();
+		this.camera(data);
+// 		this.players(data);
 	},
 	
 	map() {
@@ -138,35 +143,51 @@ const draw = {
 	},
 	
 	grid() {
-		for(let i = 0; i <= 50; i++) {
+		for(let i = 0; i <= world.size; i++) {
 			ctx.beginPath();
 			ctx.setLineDash([2, 2])
-			ctx.moveTo( i * I.size - 0.25, 0      - 0.25 );
-			ctx.lineTo( i * I.size - 0.25, 800    - 0.25 );
+			ctx.moveTo( i * I.size - 0.25, 0             - 0.25 );
+			ctx.lineTo( i * I.size - 0.25, canvas.width  - 0.25 );
 			ctx.lineWidth = 0.5;
 			ctx.strokeStyle = "#cfcfcf";
 			ctx.stroke();
 			
 			ctx.beginPath();
 			ctx.setLineDash([2, 2])
-			ctx.moveTo( 0      - 0.25, i * I.size - 0.25 );
-			ctx.lineTo( 800    - 0.25, i * I.size - 0.25 );
+			ctx.moveTo( 0             - 0.25, i * I.size - 0.25 );
+			ctx.lineTo( canvas.height - 0.25, i * I.size - 0.25 );
 			ctx.lineWidth = 0.5;
 			ctx.strokeStyle = "#cfcfcf";
 			ctx.stroke();
 		}
 	},
 	
+	camera(data) {
+		var dashed_line = function(x1, y1, x2, y2) {
+			ctx.beginPath();
+			ctx.setLineDash([2, 1])
+			ctx.moveTo(x1 * I.size - 0.25, y1 * I.size - 0.25);
+			ctx.lineTo(x2 * I.size - 0.25, y2 * I.size - 0.25);
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = "#797979";
+			ctx.stroke();
+		}
+		dashed_line(  8,  8,  8, 13 );
+		dashed_line(  8, 13, 13, 13 );
+		dashed_line( 13,  8, 13, 13 );
+		dashed_line(  8,  8, 13,  8 );
+	},
+	
 	players(data) {
 		for( let player in PLAYER_LIST ) {
 			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
 			
-			if( PLAYER_LIST[player] && data[player] && atlas.player.loaded ) {
+			if( PLAYER_LIST[player] && data[player] && atlas.player.loaded && world.size) {
 				let player_image;
 				
 				if( player === I.id ) { player_image = I.img }
 				if( player !== I.id ) { player_image =     0 }
-// 				console.log(I.img)
+				
 				ctx.drawImage(
 					atlas.player,
 					
@@ -175,14 +196,41 @@ const draw = {
 					img.player[player_image].size,
 					img.player[player_image].size,
 					
-					I.size * PLAYER_LIST[player].x - I.size,
-					I.size * PLAYER_LIST[player].y - I.size,
+					 ((I.size * PLAYER_LIST[player].x)) + (I.size * (world.size - 1) / 2),
+					-((I.size * PLAYER_LIST[player].y)) + (I.size * (world.size - 1) / 2),
 					I.size,
 					I.size
 				);
 			}
 		}
 	}
+}
+
+function camera(data) {
+	var x, y;
+	var px = (I.size * I.x) + (I.size * (world.size - 1) / 2);
+	var py = (I.size * I.y) + (I.size * (world.size - 1) / 2);
+	
+	var camera_size = 5;
+	
+	var world_center = (world.size - 1) * I.size / 2;
+	var camera_area = ((5 - 1) * I.size / 2);
+	
+	if( px <= world_center + camera_area && px >= world_center - camera_area ) { x = 0 }
+	if( py <= world_center + camera_area && py >= world_center - camera_area ) { y = 0;}
+	
+	if( px > world_center + camera_area ) { x = ( world_center + camera_area) - px }
+	if( px < world_center - camera_area ) { x = ( world_center - camera_area) - px }
+	if( py > world_center + camera_area ) { y = (-world_center - camera_area) + py }
+	if( py < world_center - camera_area ) { y = (-world_center + camera_area) + py }
+	
+	ctx.translate(x, y);
+	
+	draw.map();
+	draw.camera();
+	draw.players(data);
+	
+	ctx.resetTransform();
 }
 
 function player_list_update(data) {
@@ -192,6 +240,13 @@ function player_list_update(data) {
 	for( let id in data        ) { if( !PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = new player(data[id].x, data[id].y); } }
 	for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] && !data[id] ) { delete PLAYER_LIST[id] ;                           continue; } }
 	for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = data[id];                           } }
+	
+	for( let id in PLAYER_LIST ) {
+		if( id === I.id ) {
+			I.x = PLAYER_LIST[id].x;
+			I.y = PLAYER_LIST[id].y;
+		}
+	}
 }
 
 

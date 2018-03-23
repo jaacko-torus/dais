@@ -6,6 +6,7 @@ The Security title must include another title after the category name to specify
 
 These are the categories which the whole 
 - Canvas
+- Camera
 - Chat
 - Client
 - Express
@@ -22,12 +23,13 @@ Keep the use of the `&&` operand to a minimum
 
 ## `Unreleased`
 ### Add
-- Graphics: first camera
 
 ### Change
-- Graphics: make `x:0,y:0` to be the center of canvas instead of top left corner
-
 - Object -> `entity`: make size a static property
+
+- Object -> `player`: starting position is `x:0, y:0`
+
+- Server: I don't need to send information to clients all the time, only when thet move. Remove the `setTimeout` in favour of something more efficient.
 
 ### Deprecate
 
@@ -35,6 +37,8 @@ Keep the use of the `&&` operand to a minimum
 - Grid: no need for it any longer
 
 ### Fix
+- Camera: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
+
 - Graphics: Adding unnecesary image references. Some references point to nothing.
 
 ### Security
@@ -44,6 +48,8 @@ Keep the use of the `&&` operand to a minimum
 ## `0.3.0` - 2018-19-3
 ### Added
 - Graphics: for map
+- Graphics: change `y` values so that up is positive and down is negative
+- Camera: first
 
 ### Changed
 - Server `&&` Graphics: define the graphics in `I`

@@ -45,8 +45,8 @@ var world = {
 		if( socket ) { socket.emit("new_map", this.map) }
 		return this.map;
 	},
-	find(x, y) {
-		return this.map[y - 1][x - 1];
+	find(l, x, y) {
+		return this.map[l][y + ((this.size - 1) / 2)][x + ((this.size - 1) / 2)];
 	}
 };
 
@@ -59,7 +59,7 @@ var world = {
 /* classes */
 
 class entity {
-	constructor(img, x = 1, y = 1, spd_x = 0, spd_y = 0) {
+	constructor(img, x = 0, y = 0, spd_x = 0, spd_y = 0) {
 		this.x = x;
 		this.y = y;
 		
@@ -104,9 +104,9 @@ class player extends entity {
 	
 	update_spd() {
 		if( this.pressing.left  ) { this.spd_x = -this.spd }
-		if( this.pressing.up    ) { this.spd_y = -this.spd }
+		if( this.pressing.up    ) { this.spd_y =  this.spd }
 		if( this.pressing.right ) { this.spd_x =  this.spd }
-		if( this.pressing.down  ) { this.spd_y =  this.spd }
+		if( this.pressing.down  ) { this.spd_y = -this.spd }
 		
 		if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
 		if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
@@ -122,8 +122,11 @@ class player extends entity {
 			if( data.input_id === "down"  ) { this.pressing.down  = data.state }
 		});
 		
+		world.make(world.size, world.size, 3);
+		world.map[0][15][16] = 6;
+		
 		socket.emit("connection", {
-			world : { map: world.make(world.size, world.size, 3), size: world.size },
+			world : { map: world.map, size: world.size },
 			id    : id,
 			size  : this.size,
 			img   : this.img,
