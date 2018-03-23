@@ -2,7 +2,8 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 The Security title must include another title after the category name to specify what action is being done, following the next format:
-	- Category: TITLE description
+
+- `category`: **TITLE** description
 
 These are the categories which the whole 
 - `canvas`
@@ -71,7 +72,7 @@ Keep the use of the `&&` operand to a minimum
 - `+ canvas -> graphics`: When changing `I.img`, the only change should be seen in the player, not in others.
 
 ### Security
-- `Object -> player`: CHANGE `I.name` to `writable: false`.
+- `Object -> player`: **CHANGE** `I.name` to `writable: false`.
 
 
 
