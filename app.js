@@ -1,6 +1,6 @@
 /* debug */
 
-const DEBUG = true;
+const DEBUG = false;
 
 /* dependencies */
 
