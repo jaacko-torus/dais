@@ -1,4 +1,4 @@
-	# Changelog
+# Changelog
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 The Security title must include another title after the category name to specify what action is being done, following the next format:
