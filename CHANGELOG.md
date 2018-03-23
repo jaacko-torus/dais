@@ -44,6 +44,12 @@ Keep the use of the `&&` operand to a minimum
 
 
 
+## `0.3.1` - 2018-23-3
+### Fix
+- `canvas -> camera`: camera not following character.
+
+
+
 ## `0.3.0` - 2018-22-3
 ### Added
 - `canvas -> camera`: first.
