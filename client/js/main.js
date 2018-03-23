@@ -1,3 +1,5 @@
+var DEBUG;
+
 const chat = {
 	area  : document.getElementById("chatarea"),
 	form  : document.getElementById("chatform"),
@@ -113,8 +115,8 @@ const draw = {
 	world(data) {
 		
 		camera(data);
-// 		this.grid();
-// 		this.camera(data);
+		
+		if( DEBUG ) { this.grid(); this.camera(data); }
 	},
 	
 	map() {
@@ -226,7 +228,7 @@ function camera(data) {
 	ctx.translate(x, y);
 	
 	draw.map();
-// 	draw.camera();
+	if( DEBUG ) { draw.camera() }
 	draw.players(data);
 	
 	ctx.resetTransform();
@@ -253,6 +255,8 @@ var socket = io();
 
 
 socket.on("connection", function(data) {
+	DEBUG = data.DEBUG;
+	
 	Object.defineProperty(I, "id", { value: data.id, writable: false });
 	I.size = data.size;
 	I.img  = data.img;
@@ -290,7 +294,7 @@ chat.form.onsubmit = function(e) {
 };
 
 
-socket.on("debug", function(data) { console.log(data) });
+if( DEBUG ) { socket.on("debug", function(data) { console.log(data) }) }
 
 
 socket.on("update", function(data) {

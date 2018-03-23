@@ -6,12 +6,14 @@ The Security title must include another title after the category name to specify
 
 These are the categories which the whole 
 - Canvas
-- Camera
+- Canvas -> `camera`:
+- Canvas -> `graphics`:
+- Canvas -> `grid`:
+- Canvas -> `map`:
 - Chat
 - Client
+- Debug
 - Express
-- Graphics
-- Grid
 - Object -> `entity`
 - Object -> `player`
 - Server
@@ -25,21 +27,18 @@ Keep the use of the `&&` operand to a minimum
 ### Add
 
 ### Change
-- Object -> `entity`: make size a static property
-
-- Object -> `player`: starting position is `x:0, y:0`
+- Object -> `entity`: make size a static property.
+- Object -> `player`: `update` function should be part of each player instead of being a global.
 
 - Server: I don't need to send information to clients all the time, only when thet move. Remove the `setTimeout` in favour of something more efficient.
 
 ### Deprecate
 
 ### Remove
-- Grid: no need for it any longer
 
 ### Fix
-- Camera: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
-
-- Graphics: Adding unnecesary image references. Some references point to nothing.
+- Canvas -> `camera`: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
+- Canvas -> `graphics`: Adding unnecesary image references. Some references point to nothing.
 
 ### Security
 
@@ -47,38 +46,42 @@ Keep the use of the `&&` operand to a minimum
 
 ## `0.3.0` - 2018-19-3
 ### Added
-- Graphics: for map
-- Graphics: change `y` values so that up is positive and down is negative
-- Camera: first
+- Canvas -> `camera`: first.
+- Canvas -> `graphics`: for map.
+- Canvas -> `graphics`: change `y` values so that up is positive and down is negative.
 
 ### Changed
-- Server `&&` Graphics: define the graphics in `I`
+- Debug: `DEBUG` is now transmited from server to client to make debugging easier.
+
+- Object -> `player`: starting position is `x:0, y:0`.
+
+- Server `&&` Canvas -> `graphics`: define the graphics in `I`.
 
 
 
 ## `0.2.0` - 2018-19-3
 ### Added
-- Graphics: for player
-- Graphics: load all images in so that they are easily accesible
-
-- Grid: numerical grid, to not use multiples of 16
+- Canvas -> `graphics`: for player.
+- Canvas -> `graphics`: load all images in so that they are easily accesible.
+- Canvas -> `grid`: numerical grid, to not use multiples of 16.
 
 ### Fix
-- `+` Graphics: When changing `I.img`, the only change should be seen in the player, not in others.
+- `+` Canvas -> `graphics`: When changing `I.img`, the only change should be seen in the player, not in others.
 
 ### Security
-- Object -> `player`: CHANGE `I.name` to `writable: false`
+- Object -> `player`: CHANGE `I.name` to `writable: false`.
 
 
 
 ## `0.1.0` - 2018-17-3
 ### Added
-- Chat: named users
-- Chat: users can't change their name
-- Chat: delivered the user id to user so that users can identify themselves in `PLAYER_LIST`
+- Chat: named users.
+- Chat: users can't change their name.
+- Chat: delivered the user id to user so that users can identify themselves in `PLAYER_LIST`.
 
-- Graphics: added a grid
+- Canvas -> `grid`: added first.
 
 ### Changed
-- Graphics: users are now seen as black boxes instead of numbers on a screen
-- Player Object: now using ES6 Classes
+- Canvas -> `graphics`: users are now seen as black boxes instead of numbers on a screen.
+
+- Object -> `player`: now using ES6 Classes.

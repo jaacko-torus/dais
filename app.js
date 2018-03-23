@@ -126,6 +126,7 @@ class player extends entity {
 		world.map[0][15][16] = 6;
 		
 		socket.emit("connection", {
+			DEBUG: DEBUG,
 			world : { map: world.map, size: world.size },
 			id    : id,
 			size  : this.size,
