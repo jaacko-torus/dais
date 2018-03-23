@@ -44,7 +44,7 @@ Keep the use of the `&&` operand to a minimum
 
 
 
-## `0.3.0` - 2018-19-3
+## `0.3.0` - 2018-22-3
 ### Added
 - Canvas -> `camera`: first.
 - Canvas -> `graphics`: for map.
