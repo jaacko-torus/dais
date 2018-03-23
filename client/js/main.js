@@ -111,11 +111,10 @@ var I = {
 
 const draw = {
 	world(data) {
-// 		this.map();
+		
 		camera(data);
-		this.grid();
-		this.camera(data);
-// 		this.players(data);
+// 		this.grid();
+// 		this.camera(data);
 	},
 	
 	map() {
@@ -227,7 +226,7 @@ function camera(data) {
 	ctx.translate(x, y);
 	
 	draw.map();
-	draw.camera();
+// 	draw.camera();
 	draw.players(data);
 	
 	ctx.resetTransform();
