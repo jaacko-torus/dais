@@ -1,6 +1,6 @@
 # Description
 
-I have a bad memory, so I just save all the comands for later use.
+I have a bad memory, so I just save all the commands for later use.
 
 # nvm
 
@@ -34,7 +34,7 @@ Display all node versions installed:
 $ nvm ls
 ```
 
-Set the default node version (so that you don't have to set it again everytime you restart server):
+Set the default node version (so that you don't have to set it again every time you restart server):
 ```
 $ nvm alias default <version>
 
