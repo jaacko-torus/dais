@@ -6,6 +6,7 @@ The Security title must include another title after the category name to specify
 - `category`: **TITLE** description
 
 These are the categories which the whole
+- `bug`
 - `canvas`
 - `chat`
 - `client`
@@ -28,11 +29,10 @@ Keep the use of the `&&` operand to a minimum
 
 ## `Unreleased`
 ### Add
-- `object - player`: allow to move players through console(e.g. `I.move_right()`)
+- `world -> navigation`: when the mouse is clicked on a tile it should be marked differently than when hovered.
 
 ### Change
 - `object -> entity`: make `size` a static property. *what is this?*
-
 - `server`: I don't need to send information to clients all the time, only when they move. Remove the `setTimeout` in favor of something more efficient. *maybe?*
 
 ### Deprecate
@@ -40,8 +40,27 @@ Keep the use of the `&&` operand to a minimum
 ### Remove
 
 ### Fix
+- `object -> player`: movement through console needs to be improved. For now the timing doesn't work all the time, and a new method of movement that can work with the server should be created, so that the client serves the server with all of the movement it is planning to do, and the server decides when the movement happens.
+- `+ object -> player`: make `draw()` and `update()` so that they are not static.
+- `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
+- `debug && world -> navigation`: setting `world.keyboard.boolean` to `false` has no effect
+- `debug`: if one moves to the right while holding the key and lets go after one is outside the map, the camera continues to move in that direction even if one stops holding the key, or even holds left and hold.
 
 ### Security
+
+
+
+## `0.4.1` - 2018-30-5
+### Added
+- `object -> player`: allow to move players through console(e.g. `I.move_right()`).
+
+### Change
+- `+ world -> navigation`: the keyboard handling should be a property of `world`.
+- `world -> navigation`: make `world.mouse.observe(true)` a default when initiating the app
+- `+ world -> images`: image loading should be handled by a property in `world` instead of being a global.
+
+## Deprecate
+- `world -> camera`: there is no need to draw the camera limit at `(0,0)`, only draw the one following the player.
 
 
 
@@ -72,9 +91,7 @@ Keep the use of the `&&` operand to a minimum
 
 ### Changed
 - `debug`: `DEBUG` is now transmitted from server to client to make debugging easier.
-
 - `object -> player`: starting position is `x:0, y:0`.
-
 - `server && world -> graphics`: define the graphics in `I`.
 
 ## Fixed
@@ -101,7 +118,6 @@ Keep the use of the `&&` operand to a minimum
 - `chat`: named users.
 - `chat`: users can't change their name.
 - `chat`: delivered the user id to user so that users can identify themselves in `PLAYER_LIST`.
-
 - `world -> grid`: added first.
 
 ### Changed
