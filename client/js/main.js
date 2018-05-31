@@ -1,3 +1,7 @@
+
+var arr = [5, 6, function(z, c) { return z+c }]
+
+
 var DEBUG;
 
 const chat = {
@@ -13,55 +17,6 @@ canvas.width  = 336; // document.body.clientWidth;
 canvas.height = 336; // document.body.clientHeight;
 
 ctx.font = "30px Arial";
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-
-var atlas = {
-	map    : { src: "./img/map.png"    , add_width  : 1 , add_height: 1 },
-	player : { src: "./img/player.png" , add_height : 1 }
-};
-
-var img = {};
-
-function load_all_atlas() {
-	for(let name in atlas) {
-		let src = atlas[name].src;
-		let add_width  = atlas[name].add_width;
-		let add_height = atlas[name].add_height;
-
-		atlas[name] = new Image();
-		atlas[name].onload = function() {
-			this.loaded = true;
-			this.sub_image_size = 16;
-
-			if( add_width  ) { this.width  += add_width  }
-			if( add_height ) { this.height += add_height }
-
-			load_all_images();
-		}
-
-		atlas[name].src = src;
-	}
-}
-
-function load_all_images() {
-	for(let name in atlas) {
-		img[name] = [];
-		let size = atlas[name].sub_image_size;
-
-		for(let y = 0; y < atlas[name].height; y += size + 1) {
-			for(let x = 0; x < atlas[name].width; x += size + 1) {
-				img[name].push({
-					size : atlas[name].sub_image_size,
-					x,
-					y
-				});
-			}
-		}
-	}
-}
 
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -88,7 +43,7 @@ class player extends entity {
 	constructor(x, y, size) { super(x, y, size) }
 
 	static update(data) {
-		// BUG: make this function non-static so that the next line is doable
+		// FIX: make this function non-static so that the next line is doable
 		// super.update();
 
 		//  loop through `data`        . If the player is not in `PLAYER_LIST` and is     in `data` , then create a new player
@@ -108,22 +63,23 @@ class player extends entity {
 
 	static draw(data) {
 		// super.draw();
+		let pre = world.preload;
 		for( let player in PLAYER_LIST ) {
 			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
 
-			if( PLAYER_LIST[player] && data[player] && atlas.player.loaded && world.map.size) {
+			if( PLAYER_LIST[player] && data[player] && pre.meta.player.loaded && world.map.size) {
 				let player_image;
 
 				if( player === I.id ) { player_image = I.img }
 				if( player !== I.id ) { player_image =     0 }
 
 				ctx.drawImage(
-					atlas.player,
+					pre.meta.player,
 
-					img.player[player_image].x,
-					img.player[player_image].y,
-					img.player[player_image].size,
-					img.player[player_image].size,
+					pre.img.player[player_image].x,
+					pre.img.player[player_image].y,
+					pre.img.player[player_image].size,
+					pre.img.player[player_image].size,
 
 					 ((I.size * PLAYER_LIST[player].x)) + (I.size * (world.map.size - 1) / 2),
 					-((I.size * PLAYER_LIST[player].y)) + (I.size * (world.map.size - 1) / 2),
@@ -144,6 +100,9 @@ class self extends player {
 		this.my_name = my_name;
 	}
 
+	// FIX: fake solution down ahead
+	move( direction ) { world.keyboard.emit(direction, true); world.keyboard.emit(direction, false); }
+
 	update() { super.update() }
 	draw() { super.draw() }
 }
@@ -161,22 +120,71 @@ var I = new self(
 
 
 var world = {
+	preload: {
+		img: {},
+
+		meta: {
+			map    : { src: "./img/map.png"    , add_width  : 1 , add_height: 1 },
+			player : { src: "./img/player.png" , add_height : 1 }
+		},
+
+		load_atlas() {
+
+			for(let name in this.meta) {
+				let src = this.meta[name].src;
+				let add_width  = this.meta[name].add_width;
+				let add_height = this.meta[name].add_height;
+
+				this.meta[name] = new Image();
+				this.meta[name].onload = function() {
+					this.loaded = true;
+					this.sub_image_size = 16;
+
+					if( add_width  ) { this.width  += add_width  }
+					if( add_height ) { this.height += add_height }
+
+					world.preload.load_img_in_atlas(); // this is annoying
+				}
+
+				this.meta[name].src = src;
+			}
+		},
+
+		load_img_in_atlas() {
+			for(let name in this.meta) {
+				this.img[name] = [];
+				let size = this.meta[name].sub_image_size;
+
+				for(let y = 0; y < this.meta[name].height; y += size + 1) {
+					for(let x = 0; x < this.meta[name].width; x += size + 1) {
+						this.img[name].push({
+							size : this.meta[name].sub_image_size,
+							x,
+							y
+						});
+					}
+				}
+			}
+		}
+	},
 	map: {
 		data: [],
 		size: 21,
 		update() {},
 		draw(vx, vy) {
+			let pre = world.preload;
+
 			for(let l = 0; l < this.data.length; l++) {
 				for(let x = 0; x < this.size; x++) {
 					for(let y = 0; y < this.size; y++) {
-						if(atlas.map.loaded && this.data[l] && this.data[l][x] && this.data[l][x][y]) {
+						if(pre.meta.map.loaded && this.data[l] && this.data[l][x] && this.data[l][x][y]) {
 							ctx.drawImage(
-								atlas.map,
+								pre.meta.map,
 
-								img.map[this.data[l][x][y]].x    ,
-								img.map[this.data[l][x][y]].y    ,
-								img.map[this.data[l][x][y]].size ,
-								img.map[this.data[l][x][y]].size ,
+								pre.img.map[this.data[l][x][y]].x    ,
+								pre.img.map[this.data[l][x][y]].y    ,
+								pre.img.map[this.data[l][x][y]].size ,
+								pre.img.map[this.data[l][x][y]].size ,
 
 								I.size * x ,
 								I.size * y ,
@@ -191,15 +199,14 @@ var world = {
 	},
 	camera: {
 		size: 5,
-		center: {},
-		get area()   { return (this.size - 1) * I.size / 2 },
+		center: { x: undefined, y: undefined },
+		get area() { return (this.size - 1) * I.size / 2 },
 		vector: {x: 0, y: 0},
 
 		transform(data) {
 			ctx.translate(this.vector.x, this.vector.y);
 
 			world.map.draw(this.vector.x, this.vector.y);
-			if( DEBUG ) { this.draw() }
 			player.draw(data);
 
 			ctx.resetTransform();
@@ -259,11 +266,12 @@ var world = {
 		},
 	},
 	mouse: {
+		boolean: true,
 		position: {},
 
 		observe(boolean) {
 			if(  boolean ) {    canvas.addEventListener( "mousemove", this.update, false ) }
-			if( !boolean ) { canvas.removeEventListener( "mousemove", this.update, false ) }
+			if( !boolean ) { canvas.removeEventListener( "mousemove", this.update, false ); this.position = {}; }
 		},
 		update(evt) {
 			let rect = canvas.getBoundingClientRect();
@@ -277,8 +285,40 @@ var world = {
 			ctx.fillRect( I.size * this.position.x, I.size * this.position.y, I.size, I.size );
 		}
 	},
+	keyboard: {
+		boolean: true,
+
+		key: {
+			left  : false,
+			up    : false,
+			right : false,
+			down  : false
+		},
+
+		emit(direction, position) { socket.emit("key_press", { input_id: direction , state: position }) },
+
+		emit_keys(position) {
+			if( position === "down" ) { position = true  }
+			if( position === "up"   ) { position = false }
+
+			return (e) => {
+				if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { this.emit( "left"  , position ) }
+				if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { this.emit( "up"    , position ) }
+				if( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) { this.emit( "right" , position ) }
+				if( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) { this.emit( "down"  , position ) }
+			}
+		},
+
+		update(boolean) {
+			if(  boolean ) {    document.addEventListener("keydown", this.emit_keys("down"), false);    document.addEventListener("keyup", this.emit_keys("up"), false); }
+			if( !boolean ) { document.removeEventListener("keydown", this.emit_keys("down"), false); document.removeEventListener("keyup", this.emit_keys("up"), false); }
+		}
+	},
 
 	update() {
+		this.keyboard.update(this.keyboard.boolean);
+
+		this.mouse.observe(this.mouse.boolean);
 	},
 
 	draw(data) {
@@ -300,6 +340,7 @@ var world = {
 
 
 function update(data) {
+	world.update();
 	player.update(data);
 }
 
@@ -324,7 +365,9 @@ socket.on("connection", function(data) {
 
 	Object.assign(world.map, { data: data.world.map , size: data.world.size });
 
-	load_all_atlas();
+	// load_all_atlas();
+	world.preload.load_atlas();
+
 	console.info(data.world.msg);
 });
 
@@ -363,19 +406,3 @@ socket.on("update", function(data) {
 	update(data);
 	draw(data);
 });
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-function keyboard_on(e, position) {
-	if( position === "down" ) { position = true  }
-	if( position === "up"   ) { position = false }
-
-	if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { socket.emit("key_press", { input_id: "left"  , state: position }); }
-	if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { socket.emit("key_press", { input_id: "up"    , state: position }); }
-	if( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) { socket.emit("key_press", { input_id: "right" , state: position }); }
-	if( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) { socket.emit("key_press", { input_id: "down"  , state: position }); }
-}
-
-document.onkeydown = (e) => { keyboard_on( e , "down" ) };
-document.onkeyup   = (e) => { keyboard_on( e , "up"   ) };
