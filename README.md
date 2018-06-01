@@ -1,5 +1,5 @@
 # The Dais
-`V0.4.1`
+`V0.4.2`
 
 Starting script is `app.js`.
 
