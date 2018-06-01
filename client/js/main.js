@@ -1,8 +1,8 @@
-
-var arr = [5, 6, function(z, c) { return z+c }]
-
-
-var DEBUG;
+var DEBUG = {
+	chat   : false,
+	camera : false,
+	grid   : false,
+};
 
 const chat = {
 	area  : document.getElementById("chatarea"),
@@ -42,8 +42,7 @@ var PLAYER_LIST = {};
 class player extends entity {
 	constructor(x, y, size) { super(x, y, size) }
 
-	static update(data) {
-		// FIX: make this function non-static so that the next line is doable
+	static update(data) { // Leave this function be static for now
 		// super.update();
 
 		//  loop through `data`        . If the player is not in `PLAYER_LIST` and is     in `data` , then create a new player
@@ -62,6 +61,7 @@ class player extends entity {
 	}
 
 	static draw(data) {
+		// FIX: make this function non-static so that the next line is doable
 		// super.draw();
 		let pre = world.preload;
 		for( let player in PLAYER_LIST ) {
@@ -124,24 +124,24 @@ var world = {
 		img: {},
 
 		meta: {
-			map    : { src: "./img/map.png"    , add_width  : 1 , add_height: 1 },
-			player : { src: "./img/player.png" , add_height : 1 }
+			map    : { src: "./img/map.png"    , margin_x : 1 , margin_y: 1 },
+			player : { src: "./img/player.png" , margin_y : 1 }
 		},
 
 		load_atlas() {
 
 			for(let name in this.meta) {
 				let src = this.meta[name].src;
-				let add_width  = this.meta[name].add_width;
-				let add_height = this.meta[name].add_height;
+				let margin_x = this.meta[name].add_width;
+				let margin_y = this.meta[name].add_height;
 
 				this.meta[name] = new Image();
 				this.meta[name].onload = function() {
 					this.loaded = true;
 					this.sub_image_size = 16;
 
-					if( add_width  ) { this.width  += add_width  }
-					if( add_height ) { this.height += add_height }
+					if( margin_x ) { this.width  += margin_x }
+					if( margin_y ) { this.height += margin_y }
 
 					world.preload.load_img_in_atlas(); // this is annoying
 				}
@@ -198,9 +198,9 @@ var world = {
 		}
 	},
 	camera: {
-		size: 5,
+		size: 2, // must be positive
 		center: { x: undefined, y: undefined },
-		get area() { return (this.size - 1) * I.size / 2 },
+		get area() { return this.size * I.size },
 		vector: {x: 0, y: 0},
 
 		transform(data) {
@@ -237,10 +237,14 @@ var world = {
 				ctx.strokeStyle = "#797979";
 				ctx.stroke();
 			}
-			dashed_line(  8,  8,  8, 13 );
-			dashed_line(  8, 13, 13, 13 );
-			dashed_line( 13,  8, 13, 13 );
-			dashed_line(  8,  8, 13,  8 );
+
+			let low  = -this.size + 10;
+			let high =  this.size + 11;
+
+			dashed_line( low  , low  , low  , high );
+			dashed_line( low  , high , high , high );
+			dashed_line( high , low  , high , high );
+			dashed_line( low  , low  , high , low  );
 		}
 	},
 	grid: {
@@ -266,12 +270,11 @@ var world = {
 		},
 	},
 	mouse: {
-		boolean: true,
 		position: {},
 
 		observe(boolean) {
 			if(  boolean ) {    canvas.addEventListener( "mousemove", this.update, false ) }
-			if( !boolean ) { canvas.removeEventListener( "mousemove", this.update, false ); this.position = {}; }
+			if( !boolean ) { canvas.removeEventListener( "mousemove", this.update, false ) ; this.position = {}; }
 		},
 		update(evt) {
 			let rect = canvas.getBoundingClientRect();
@@ -280,10 +283,19 @@ var world = {
 				y: Math.floor( ( evt.clientY - rect.top  ) / I.size )
 			};
 		},
-		draw() {
-			ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-			ctx.fillRect( I.size * this.position.x, I.size * this.position.y, I.size, I.size );
-		}
+
+		hover: {
+			boolean: true,
+			draw() {
+				ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+				ctx.fillRect( I.size * world.mouse.position.x, I.size * world.mouse.position.y, I.size, I.size );
+			}
+		},
+
+		click: {
+
+		},
+
 	},
 	keyboard: {
 		boolean: true,
@@ -318,7 +330,7 @@ var world = {
 	update() {
 		this.keyboard.update(this.keyboard.boolean);
 
-		this.mouse.observe(this.mouse.boolean);
+		this.mouse.observe(this.mouse.hover.boolean);
 	},
 
 	draw(data) {
@@ -326,12 +338,10 @@ var world = {
 
 		this.camera.transform(data);
 
-		this.mouse.draw();
+		this.mouse.hover.draw();
 
-		if( DEBUG ) {
-			this.grid.draw();
-			this.camera.draw(data);
-		}
+		if( DEBUG.camera ) { this.camera.draw(data) }
+		if( DEBUG.grid ) { this.grid.draw() }
 	},
 };
 
@@ -341,6 +351,7 @@ var world = {
 
 function update(data) {
 	world.update();
+
 	player.update(data);
 }
 
@@ -355,7 +366,11 @@ function draw(data) {
 var socket = io();
 
 socket.on("connection", function(data) {
-	DEBUG = data.world.DEBUG
+	if(data.world.debug) { // CHANGE: make this shorter with `map` or something.
+		for(let prop in DEBUG) {
+			DEBUG[prop] = true;
+		}
+	}
 
 	I.id   = data.me.id,
 	I.x    = data.me.x,
@@ -365,7 +380,6 @@ socket.on("connection", function(data) {
 
 	Object.assign(world.map, { data: data.world.map , size: data.world.size });
 
-	// load_all_atlas();
 	world.preload.load_atlas();
 
 	console.info(data.world.msg);
@@ -397,7 +411,7 @@ chat.form.onsubmit = function(e) {
 };
 
 
-if( DEBUG ) { socket.on("debug", function(data) { console.log(data) }) }
+if( DEBUG.chat ) { socket.on("debug", function(data) { console.log(data) }) }
 
 
 socket.on("update", function(data) {

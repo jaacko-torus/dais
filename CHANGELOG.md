@@ -32,7 +32,6 @@ Keep the use of the `&&` operand to a minimum
 - `world -> navigation`: when the mouse is clicked on a tile it should be marked differently than when hovered.
 
 ### Change
-- `object -> entity`: make `size` a static property. *what is this?*
 - `server`: I don't need to send information to clients all the time, only when they move. Remove the `setTimeout` in favor of something more efficient. *maybe?*
 
 ### Deprecate
@@ -41,8 +40,7 @@ Keep the use of the `&&` operand to a minimum
 
 ### Fix
 - `object -> player`: movement through console needs to be improved. For now the timing doesn't work all the time, and a new method of movement that can work with the server should be created, so that the client serves the server with all of the movement it is planning to do, and the server decides when the movement happens.
-- `+ object -> player`: make `draw()` and `update()` so that they are not static.
-- `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
+- `object -> player`: make `draw()` and `update()` so that they are not static. *Is there a need?*
 - `debug && world -> navigation`: setting `world.keyboard.boolean` to `false` has no effect
 - `debug`: if one moves to the right while holding the key and lets go after one is outside the map, the camera continues to move in that direction even if one stops holding the key, or even holds left and hold.
 
@@ -50,7 +48,18 @@ Keep the use of the `&&` operand to a minimum
 
 
 
-## `0.4.1` - 2018-30-5
+## `0.4.2` - 2018-1-6
+### Change
+- `world -> images`: `add_width` & `add_height` in `world.preload` should be `margin_x` & `margin_y` respectively
+- `debug`: whether or not the grid and camera are drawn should be up to the player. Allow player to access that through the command line.
+- `world -> camera`: `world.camera.size` should automatically fire errors when number given is not a positive integer. Additionally numbers should no longer be just odd numbers, rather a new system where the border directly around the player is considered to be `0` and the current `3` is `1` is proposed.
+
+### FIX
+- `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
+
+
+
+## `0.4.1` - 2018-31-5
 ### Added
 - `object -> player`: allow to move players through console(e.g. `I.move_right()`).
 
