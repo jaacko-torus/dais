@@ -56,6 +56,7 @@ Keep the use of the `&&` operand to a minimum
 
 ### FIX
 - `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
+- `world -> map && server`: `world.map[0]` had repeated values.
 
 
 

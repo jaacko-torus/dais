@@ -29,19 +29,32 @@ console.log("Server started.");
 var world = {
 	size: 21,
 
-	make(width, height, layer, socket) {
-		this.map = [];
-
+	build(width, height, layer) {
 		for(let l = 0; l < layer; l++) {
 			this.map.push([])
 			for(let y = 0; y < height; y++) {
 				this.map[l].push([]);
 				for(let x = 0; x < width; x++) {
-					this.map[0][y].push( 5 );
-					if(l) { this.map[l][y].push( undefined ) }
+					this.map[l][y].push( undefined );
 				}
 			}
 		}
+	},
+
+	edit(width, height, layer) {
+		// all tiles in layer 0 are grass
+		for(let y = 0; y < height; y++) {
+			for(let x = 0; x < width; x++) {
+				this.map[0][y][x] = 6;
+			}
+		}
+	},
+
+	make(width, height, layer, socket) {
+		this.map = [];
+
+		this.build(width, height, layer);
+		this.edit(width, height, layer);
 
 		if( socket ) { socket.emit("new_map", this.map) }
 		return this.map;
@@ -76,7 +89,7 @@ class entity {
 var PLAYER_LIST = {};
 
 class player extends entity {
-	constructor(x, y, spd_x = 0, spd_y = 0, img = 0) {
+	constructor(x, y, spd_x = 0, spd_y = 0, img = 1) {
 		super(img, x, y);
 
 		this.spd_x = spd_x;
@@ -124,7 +137,6 @@ class player extends entity {
 		});
 
 		world.make(world.size, world.size, 3);
-		// world.map[0][15][16] = 6;
 
 		socket.emit("connection", {
 			world : {

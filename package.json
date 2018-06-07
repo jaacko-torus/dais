@@ -8,20 +8,17 @@
 	},
 	"scripts": {
 		"start": "node app.js",
-
 		"add": "git add -A",
 		"commit": "git commit -am 'new update'",
 		"push:github": "git push origin master",
 		"push:heroku": "git push heroku master",
-
 		"clone:dais": "git clone https://github.com/jaacko-torus/dais.git",
-
 		"install:nvm": "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash",
 		"install:heroku": "npm install -g heroku"
 	},
 	"dependencies": {
 		"express": "^4.15.2",
-		"npm": "^6.0.1",
+		"npm": "^6.1.0",
 		"socket.io": "^2.0.3"
 	},
 	"repository": {
