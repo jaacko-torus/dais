@@ -1,7 +1,7 @@
 var DEBUG = {
 	chat   : false,
-	camera : true,
-	grid   : true,
+	camera : false,
+	grid   : false,
 };
 
 const chat = {
@@ -173,6 +173,7 @@ var world = {
 	map: {
 		data: [],
 		size: 21,
+		layers: 3,
 
 		update() {},
 
@@ -203,7 +204,8 @@ var world = {
 						if( pre.meta.map.loaded ) {
 							if( this.data[l][y][x] > 0 ) { this.normal(l, y, x) }
 							// if( this.data[l][y][x] = 0 ) { world.mouse.move.draw(l, y, x) }
-							if( this.data[l][y][x] < 0 ) { world.mouse.move.draw(y, x); console.log("drawing a -1") }
+							if( this.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x) }
+							if( this.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) }
 						}
 					}
 				}
@@ -303,17 +305,25 @@ var world = {
 					y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 				};
 
-				let l =  world.map.data.length  - 1;
-				let y = -world.mouse.position.y + (world.map.size - 1) / 2;
-				let x =  world.mouse.position.x + (world.map.size - 1) / 2;
+				let index_l =  world.map.data.length  - 1;
+				let index_y = -world.mouse.position.y + (world.map.size - 1) / 2;
+				let index_x =  world.mouse.position.x + (world.map.size - 1) / 2;
 
 				// if the mouse is outside of the map, there is no need to color it.
-				// console.log({x,y});
-				// if( world.map.data[l][y] && world.map.data[l][y][x] ) { world.map.data[l][y][x] = -1 }
-				if( world.map.data[l][y] && world.map.data[l][y][x] == null) { world.map.data[l][y][x] = -1 }
+				// erase all elements that do not match the mouse position
+				for(y = 0; y < world.map.size; y++) {
+					for(x = 0; x < world.map.size; x++) {
+						if(world.map.data[index_l][y][x] === -1) { world.map.data[index_l][y][x] = null }
+					}
+				}
+				// fill the corresponding square based on where th cursor is
+				if(
+					world.map.data[index_l][index_y][index_x] == null &&
+					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
+					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
+				) { world.map.data[index_l][index_y][index_x] = -1 }
 			},
 			draw(y, x) {
-				console.log({y,x})
 				ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
 				ctx.fillRect(
 					I.size * x,
@@ -324,29 +334,47 @@ var world = {
 			}
 		},
 		click: { // FIX on hold, first fix move{}
-			boolean: false,
+			boolean: true,
 			update(evt) {
 				let rect = canvas.getBoundingClientRect();
 				world.mouse.tile_selected = {
 					x: Math.floor( ( evt.clientX - rect.left ) / I.size ),
 					y: Math.floor( ( evt.clientY - rect.top  ) / I.size )
 				};
-				world.mouse.ref_to_map_center = {
-					x: -world.camera.center.x + (world.mouse.tile_selected.x * I.size) ,
-					y:  world.camera.center.y - (world.mouse.tile_selected.y * I.size)
-				};
+				// world.mouse.ref_to_map_center = {
+				// 	x: -world.camera.center.x + (world.mouse.tile_selected.x * I.size) ,
+				// 	y:  world.camera.center.y - (world.mouse.tile_selected.y * I.size)
+				// };
+
+				let index_l =  world.map.data.length  - 1;
+				let index_y = -world.mouse.position.y + (world.map.size - 1) / 2;
+				let index_x =  world.mouse.position.x + (world.map.size - 1) / 2;
+
+				// if the mouse is outside of the map, there is no need to color it.
+				// erase all elements that do not match the mouse position
+				// for(y = 0; y < world.map.size; y++) {
+				// 	for(x = 0; x < world.map.size; x++) {
+				// 		if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = null }
+				// 	}
+				// }
+				// fill the corresponding square based on where the cursor is
+				if(
+					world.map.data[index_l][index_y][index_x] == null &&
+					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
+					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
+				) { world.map.data[index_l][index_y][index_x] = -2; console.log("click"); }
 			},
 			draw(vector_x, vector_y) {
-				let x, y;
-				x = I.size * world.mouse.tile_selected.x - vector_x;
-				y = I.size * world.mouse.tile_selected.y - vector_y;
+				// let x, y;
+				// x = I.size * world.mouse.tile_selected.x - vector_x;
+				// y = I.size * world.mouse.tile_selected.y - vector_y;
 
 				// console.log( world.mouse.ref_to_map_center );
 
 				ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
 				ctx.fillRect(
-					x ,
-					y ,
+					I.size * x ,
+					I.size * y ,
 					I.size ,
 					I.size
 				);
@@ -387,6 +415,7 @@ var world = {
 		this.keyboard.update(this.keyboard.boolean);
 
 		this.mouse.observe(this.mouse.move.boolean);
+		this.mouse.observe(this.mouse.click.boolean);
 	},
 
 	draw(data) {
