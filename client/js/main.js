@@ -304,7 +304,7 @@ var world = {
 					x:  Math.floor( ( evt.clientX - rect.left ) / I.size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
 					y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 				};
-
+				// console.log(world.mouse.position);
 				let index_l =  world.map.data.length  - 1;
 				let index_y = -world.mouse.position.y + (world.map.size - 1) / 2;
 				let index_x =  world.mouse.position.x + (world.map.size - 1) / 2;
@@ -338,39 +338,28 @@ var world = {
 			update(evt) {
 				let rect = canvas.getBoundingClientRect();
 				world.mouse.tile_selected = {
-					x: Math.floor( ( evt.clientX - rect.left ) / I.size ),
-					y: Math.floor( ( evt.clientY - rect.top  ) / I.size )
+					x:  Math.floor( ( evt.clientX - rect.left ) / I.size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
+					y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 				};
-				// world.mouse.ref_to_map_center = {
-				// 	x: -world.camera.center.x + (world.mouse.tile_selected.x * I.size) ,
-				// 	y:  world.camera.center.y - (world.mouse.tile_selected.y * I.size)
-				// };
 
 				let index_l =  world.map.data.length  - 1;
-				let index_y = -world.mouse.position.y + (world.map.size - 1) / 2;
-				let index_x =  world.mouse.position.x + (world.map.size - 1) / 2;
+				let index_y = -world.mouse.tile_selected.y + (world.map.size - 1) / 2;
+				let index_x =  world.mouse.tile_selected.x + (world.map.size - 1) / 2;
 
-				// if the mouse is outside of the map, there is no need to color it.
 				// erase all elements that do not match the mouse position
-				// for(y = 0; y < world.map.size; y++) {
-				// 	for(x = 0; x < world.map.size; x++) {
-				// 		if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = null }
-				// 	}
-				// }
+				for(y = 0; y < world.map.size; y++) {
+					for(x = 0; x < world.map.size; x++) {
+						if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = null }
+					}
+				}
 				// fill the corresponding square based on where the cursor is
 				if(
-					world.map.data[index_l][index_y][index_x] == null &&
-					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
-					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
-				) { world.map.data[index_l][index_y][index_x] = -2; console.log("click"); }
+					(world.map.data[index_l][index_y][index_x] == null || world.map.data[index_l][index_y][index_x] === -1) &&
+					world.mouse.tile_selected.x ===  index_x - (world.map.size - 1) / 2 &&
+					world.mouse.tile_selected.y === -index_y + (world.map.size - 1) / 2
+				) { world.map.data[index_l][index_y][index_x] = -2 }
 			},
-			draw(vector_x, vector_y) {
-				// let x, y;
-				// x = I.size * world.mouse.tile_selected.x - vector_x;
-				// y = I.size * world.mouse.tile_selected.y - vector_y;
-
-				// console.log( world.mouse.ref_to_map_center );
-
+			draw(y, x) {
 				ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
 				ctx.fillRect(
 					I.size * x ,
@@ -415,7 +404,7 @@ var world = {
 		this.keyboard.update(this.keyboard.boolean);
 
 		this.mouse.observe(this.mouse.move.boolean);
-		this.mouse.observe(this.mouse.click.boolean);
+		// this.mouse.observe(this.mouse.click.boolean);
 	},
 
 	draw(data) {
