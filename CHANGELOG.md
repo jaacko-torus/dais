@@ -1,6 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+The format is based on [Keep a Changelog 1.0.0](http://keepachangelog.com/en/1.0.0/)
 The Security title must include another title after the category name to specify what action is being done, following the next format:
 
 - `category`: **TITLE** description
@@ -29,46 +29,72 @@ Keep the use of the `&&` operand to a minimum
 
 ## `Unreleased`
 ### Add
-- `world -> navigation`: when the mouse is clicked on a tile it should be marked differently than when hovered.
 
 ### Change
-- `object -> entity`: make `size` a static property. *what is this?*
+- `world -> map`: `layer` should change according to what the server dictates.
 - `server`: I don't need to send information to clients all the time, only when they move. Remove the `setTimeout` in favor of something more efficient. *maybe?*
 
 ### Deprecate
+- `world -> camera`: `world.camera.center` and fully replace it with `world.camera.vector`, or make `center` a `get()` function(first option seems better).
 
 ### Remove
 
 ### Fix
+- `mouse`: the user is capable of changing the values of coordinates outside of the map, only in the `x` coordinates.
 - `object -> player`: movement through console needs to be improved. For now the timing doesn't work all the time, and a new method of movement that can work with the server should be created, so that the client serves the server with all of the movement it is planning to do, and the server decides when the movement happens.
-- `+ object -> player`: make `draw()` and `update()` so that they are not static.
-- `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
-- `debug && world -> navigation`: setting `world.keyboard.boolean` to `false` has no effect
+- `object -> player`: make `draw()` and `update()` so that they are not static. *Is there a need?*
+- `debug && world -> navigation`: setting `world.keyboard.boolean`, and `world.mouse.click.boolean` to `false` has no effect
 - `debug`: if one moves to the right while holding the key and lets go after one is outside the map, the camera continues to move in that direction even if one stops holding the key, or even holds left and hold.
 
 ### Security
 
+~
 
+## `0.5.0` - 2018-6-9
+### Added
+- `mouse`: added function `infolog()`, for the click event.
 
-## `0.4.1` - 2018-30-5
+### Changed
+- `+ world -> map && mouse`: Major update. Now `world.map` consists of layers, so instead of drawing a square corresponding to the tile coordinates, I am coloring the tile of the latest layer.
+- `world -> map`: values holding 1 and above represents images, 0 represents empty, and -1 and below represents types of tile selection.
+
+### Fixed
+- `mouse`: when mouse hover outside of the map, only in the `y` orientation, I get a strange error in line `321`: `Uncaught TypeError`. Caused by not declaring that there is no need to render if `world.map.data[index_l][index_y] != null`.
+
+~
+
+## `0.4.2` - 2018-6-1
+### Changed
+- `world -> images`: `add_width` & `add_height` in `world.preload` should be `margin_x` & `margin_y` respectively
+- `debug`: whether or not the grid and camera are drawn should be up to the player. Allow player to access that through the command line.
+- `world -> camera`: `world.camera.size` should automatically fire errors when number given is not a positive integer. Additionally numbers should no longer be just odd numbers, rather a new system where the border directly around the player is considered to be `0` and the current `3` is `1` is proposed.
+
+### Fixed
+- `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
+- `world -> map && server`: `world.map[0]` had repeated values.
+
+~
+
+## `0.4.1` - 2018-5-31
 ### Added
 - `object -> player`: allow to move players through console(e.g. `I.move_right()`).
 
-### Change
+### Changed
 - `+ world -> navigation`: the keyboard handling should be a property of `world`.
 - `world -> navigation`: make `world.mouse.observe(true)` a default when initiating the app
 - `+ world -> images`: image loading should be handled by a property in `world` instead of being a global.
 
-## Deprecate
+## Deprecated
 - `world -> camera`: there is no need to draw the camera limit at `(0,0)`, only draw the one following the player.
 
+~
 
-
-## `0.4.0` - 2018-30-5
+## `0.4.0` - 2018-5-30
 ### Added
 - `world -> navigation`: support for cursor, location can be activated through `world.mouse.observe()`, which returns object with `x` & `y` values of cursor.
 - `world -> navigation`: slightly darken the tile below the cursor.
 - `object -> self`: created this constructor for more standardization.
+- `world -> navigation`: when the mouse is clicked on a tile it should be marked differently than when hovered.
 
 ### Changed
 - `world -> camera`: the camera now works perfectly. The camera will stay this way for a while. Next up there wont be a need to translate the whole grid because I will only draw what is on screen, for now through this is good enough.
@@ -81,9 +107,9 @@ Keep the use of the `&&` operand to a minimum
 - `client`: Some debugging and reformatting has to be done in `main.js`. It should be more readable.
 - `world -> camera`: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
 
+~
 
-
-## `0.3.0` - 2018-22-3
+## `0.3.0` - 2018-3-22
 ### Added
 - `world -> camera`: first.
 - `world -> graphics`: for map.
@@ -97,9 +123,9 @@ Keep the use of the `&&` operand to a minimum
 ## Fixed
 - `world -> graphics`: Adding unnecessary image references. Some references point to nothing.
 
+~
 
-
-## `0.2.0` - 2018-19-3
+## `0.2.0` - 2018-3-19
 ### Added
 - `world -> graphics`: for player.
 - `world -> graphics`: load all images in so that they are easily accessible.
@@ -111,9 +137,9 @@ Keep the use of the `&&` operand to a minimum
 ### Security
 - `Object -> player`: **CHANGE** `I.name` to `writable: false`.
 
+~
 
-
-## `0.1.0` - 2018-17-3
+## `0.1.0` - 2018-3-17
 ### Added
 - `chat`: named users.
 - `chat`: users can't change their name.
