@@ -1,6 +1,6 @@
 {
 	"name": "the-dais",
-	"version": "0.4.2",
+	"version": "0.5.0",
 	"description": "The free multiplayer 2D Orthogonal RPG",
 	"main": "app.js",
 	"engines": {

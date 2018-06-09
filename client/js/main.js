@@ -101,7 +101,7 @@ class self extends player {
 	}
 
 	// FIX: fake solution down ahead
-	move( direction ) { world.keyboard.emit(direction, true); world.keyboard.emit(direction, false); }
+	move( direction ) { world.keyboard.server_emit(direction, true); world.keyboard.server_emit(direction, false); }
 
 	update() { super.update() }
 	draw() { super.draw() }
@@ -116,10 +116,11 @@ var I = new self(
 	"" // my_name
 );
 
+
 // --------------------------------------------------------------------------------------------------------------------
 
 
-var q;
+// world
 
 var world = {
 	preload: {
@@ -132,7 +133,6 @@ var world = {
 		},
 
 		load_atlas() {
-
 			for(let name in this.meta) {
 				let src = this.meta[name].src;
 				let margin_x = this.meta[name].add_width;
@@ -318,6 +318,7 @@ var world = {
 				}
 				// fill the corresponding square based on where th cursor is
 				if(
+					world.map.data[index_l][index_y] != null &&
 					world.map.data[index_l][index_y][index_x] == null &&
 					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
@@ -333,8 +334,10 @@ var world = {
 				);
 			}
 		},
-		click: { // FIX on hold, first fix move{}
+		click: {
 			boolean: true,
+			infolog(x, y) { console.info(`You have selected coordinates {${world.mouse.tile_selected.x}, ${world.mouse.tile_selected.y}}`) },
+
 			update(evt) {
 				let rect = canvas.getBoundingClientRect();
 				world.mouse.tile_selected = {
@@ -346,18 +349,18 @@ var world = {
 				let index_y = -world.mouse.tile_selected.y + (world.map.size - 1) / 2;
 				let index_x =  world.mouse.tile_selected.x + (world.map.size - 1) / 2;
 
-				// erase all elements that do not match the mouse position
 				for(y = 0; y < world.map.size; y++) {
 					for(x = 0; x < world.map.size; x++) {
 						if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = null }
 					}
 				}
-				// fill the corresponding square based on where the cursor is
+
 				if(
+					world.map.data[index_l][index_y] != null &&
 					(world.map.data[index_l][index_y][index_x] == null || world.map.data[index_l][index_y][index_x] === -1) &&
 					world.mouse.tile_selected.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.tile_selected.y === -index_y + (world.map.size - 1) / 2
-				) { world.map.data[index_l][index_y][index_x] = -2 }
+				) { world.map.data[index_l][index_y][index_x] = -2; world.mouse.click.infolog(index_x, index_y); }
 			},
 			draw(y, x) {
 				ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
@@ -380,17 +383,17 @@ var world = {
 			down  : false
 		},
 
-		emit(direction, position) { socket.emit("key_press", { input_id: direction , state: position }) },
+		server_emit(direction, position) { socket.emit("key_press", { input_id: direction , state: position }) },
 
 		emit_keys(position) {
 			if( position === "down" ) { position = true  }
 			if( position === "up"   ) { position = false }
 
 			return (e) => {
-				if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { this.emit( "left"  , position ) }
-				if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { this.emit( "up"    , position ) }
-				if( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) { this.emit( "right" , position ) }
-				if( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) { this.emit( "down"  , position ) }
+				if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { this.server_emit( "left"  , position ) }
+				if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { this.server_emit( "up"    , position ) }
+				if( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) { this.server_emit( "right" , position ) }
+				if( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) { this.server_emit( "down"  , position ) }
 			}
 		},
 
@@ -412,8 +415,6 @@ var world = {
 
 		this.camera.transform(data);
 
-		// this.mouse.move.draw();
-
 		if( DEBUG.camera ) { this.camera.draw(data) }
 		if( DEBUG.grid ) { this.grid.draw() }
 	},
@@ -422,6 +423,8 @@ var world = {
 
 // --------------------------------------------------------------------------------------------------------------------
 
+
+// global update & draw functions
 
 function update(data) {
 	world.update();
@@ -436,6 +439,8 @@ function draw(data) {
 
 // --------------------------------------------------------------------------------------------------------------------
 
+
+// com with server
 
 var socket = io();
 
@@ -462,6 +467,11 @@ socket.on("connection", function(data) {
 socket.on("new_map", function(data) { Object.assign(world, { map: data.world.map , size: data.world.size }) });
 
 
+// --------------------------------------------------------------------------------------------------------------------
+
+
+// dealing with chat
+
 socket.on("add_to_chat", function(data) {
 	chat.area.innerHTML += `<div id="${data}">${data.from.name}: ${data.msg}` + "</div>";
 	if( data.my_name ) {
@@ -487,6 +497,11 @@ chat.form.onsubmit = function(e) {
 
 if( DEBUG.chat ) { socket.on("debug", function(data) { console.log(data) }) }
 
+
+// --------------------------------------------------------------------------------------------------------------------
+
+
+// main loop
 
 socket.on("update", function(data) {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
