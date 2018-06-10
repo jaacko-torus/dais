@@ -35,7 +35,7 @@ var world = {
 			for(let y = 0; y < height; y++) {
 				this.map[l].push([]);
 				for(let x = 0; x < width; x++) {
-					this.map[l][y].push( 0 );
+					this.map[l][y].push(0);
 				}
 			}
 		}
@@ -97,12 +97,19 @@ class player extends entity {
 
 		this.spd = 1;
 
-		this.pressing = {
-			left  : false,
-			up    : false,
-			right : false,
-			down  : false
+		this.going = {
+			left  : 0,
+			up    : 0,
+			right : 0,
+			down  : 0,
 		};
+
+		// this.pressing = {
+		// 	left  : false,
+		// 	up    : false,
+		// 	right : false,
+		// 	down  : false
+		// };
 	}
 
 	update() {
@@ -117,23 +124,35 @@ class player extends entity {
 	}
 
 	update_spd() {
-		if( this.pressing.left  ) { this.spd_x = -this.spd }
-		if( this.pressing.up    ) { this.spd_y =  this.spd }
-		if( this.pressing.right ) { this.spd_x =  this.spd }
-		if( this.pressing.down  ) { this.spd_y = -this.spd }
+		// if( this.pressing.left  ) { this.spd_x = -this.spd }
+		// if( this.pressing.up    ) { this.spd_y =  this.spd }
+		// if( this.pressing.right ) { this.spd_x =  this.spd }
+		// if( this.pressing.down  ) { this.spd_y = -this.spd }
+		//
+		// if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
+		// if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
 
-		if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
-		if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
+		// if( this.pressing.left  ) { this.spd_x = -this.spd }
+		// if( this.pressing.up    ) { this.spd_y =  this.spd }
+		// if( this.pressing.right ) { this.spd_x =  this.spd }
+		// if( this.pressing.down  ) { this.spd_y = -this.spd }
+		//
+		// if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
+		// if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
 	}
 
 	on_connect(socket, id) {
 		PLAYER_LIST[id] = this;
 
 		socket.on("key_press", (data) => {
-			if( data.input_id === "left"  ) { this.pressing.left  = data.state }
-			if( data.input_id === "up"    ) { this.pressing.up    = data.state }
-			if( data.input_id === "right" ) { this.pressing.right = data.state }
-			if( data.input_id === "down"  ) { this.pressing.down  = data.state }
+			// if( data.input_id === "left"  ) { this.pressing.left  = data.state }
+			// if( data.input_id === "up"    ) { this.pressing.up    = data.state }
+			// if( data.input_id === "right" ) { this.pressing.right = data.state }
+			// if( data.input_id === "down"  ) { this.pressing.down  = data.state }
+			if( data.input_id === "left"  ) { this.going.left  += 1 }
+			if( data.input_id === "up"    ) { this.going.up    += 1 }
+			if( data.input_id === "right" ) { this.going.right += 1 }
+			if( data.input_id === "down"  ) { this.going.down  += 1 }
 		});
 
 		world.make(world.size, world.size, 3);

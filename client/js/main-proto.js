@@ -325,7 +325,7 @@ var world = {
 				// fill the corresponding square based on where th cursor is
 				if(
 					world.map.data[index_l][index_y] != null &&
-					world.map.data[index_l][index_y][index_x] == 0 &&
+					world.map.data[index_l][index_y][index_x] <= 0 &&
 					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
 				) { world.map.data[index_l][index_y][index_x] = -1 }
@@ -363,7 +363,7 @@ var world = {
 
 				if(
 					world.map.data[index_l][index_y] != null &&
-					(world.map.data[index_l][index_y][index_x] == 0 || world.map.data[index_l][index_y][index_x] === -1) &&
+					world.map.data[index_l][index_y][index_x] <= 0 &&
 					world.mouse.tile_selected.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.tile_selected.y === -index_y + (world.map.size - 1) / 2
 				) { world.map.data[index_l][index_y][index_x] = -2; world.mouse.click.infolog(index_x, index_y); }
