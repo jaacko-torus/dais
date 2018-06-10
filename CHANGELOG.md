@@ -29,8 +29,13 @@ Keep the use of the `&&` operand to a minimum
 
 ## `Unreleased`
 ### Add
+- `world -> navigation`: allow the player to see the movements it's going to make before it does.
 
 ### Change
+- `server`: the server should include what image it will be rendering for each player, right now in the static `player.draw`, the client decides what image to use for players other than itself.
+- `server && world -> map`: player should be rendered inside of the map instead of on top of it.
+- `server`: the server should not give the layers dedicated for user interaction to the user, because these layers are only modified and cared about by the user.
+- `server`: `world.build` should define properties with no value as `0` instead of `undefined`.
 - `world -> map`: `layer` should change according to what the server dictates.
 - `server`: I don't need to send information to clients all the time, only when they move. Remove the `setTimeout` in favor of something more efficient. *maybe?*
 
@@ -44,9 +49,15 @@ Keep the use of the `&&` operand to a minimum
 - `object -> player`: movement through console needs to be improved. For now the timing doesn't work all the time, and a new method of movement that can work with the server should be created, so that the client serves the server with all of the movement it is planning to do, and the server decides when the movement happens.
 - `object -> player`: make `draw()` and `update()` so that they are not static. *Is there a need?*
 - `debug && world -> navigation`: setting `world.keyboard.boolean`, and `world.mouse.click.boolean` to `false` has no effect
-- `debug`: if one moves to the right while holding the key and lets go after one is outside the map, the camera continues to move in that direction even if one stops holding the key, or even holds left and hold.
+- `debug`: if one moves to the left or up while holding the key and lets go after one is outside the map, the camera continues to move in that direction, leaving the player stranded, even if one stops holding the key, or even holds the opposite direction key and hold.
 
 ### Security
+
+~
+
+## `0.5.1` - 2018-6-9
+### Fixed
+- `++ object -> player`: not drawing all players. Due to the fact that the index of images when drawing changed in `V0.5.0`, changed to corresponding.
 
 ~
 
