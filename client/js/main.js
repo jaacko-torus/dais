@@ -64,14 +64,17 @@ class player extends entity {
 		// FIX: make this function non-static so that the next line is doable
 		// super.draw();
 		let pre = world.preload;
-		for( let player in PLAYER_LIST ) {
-			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
 
+
+		for( let player in PLAYER_LIST ) {
+
+			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
 			if( PLAYER_LIST[player] && data[player] && pre.meta.player.loaded && world.map.size) {
+				console.info("loaded!");
 				let player_image;
 
 				if( player === I.id ) { player_image = I.img }
-				if( player !== I.id ) { player_image =     0 }
+				if( player !== I.id ) { player_image =     1 }
 
 				ctx.drawImage(
 					pre.meta.player,
@@ -454,7 +457,7 @@ socket.on("connection", function(data) {
 	I.id   = data.me.id,
 	I.x    = data.me.x,
 	I.y    = data.me.y,
-	I.size = data.me.size,
+	// I.size = data.me.size,
 	I.img  = data.me.img,
 
 	Object.assign(world.map, { data: data.world.map , size: data.world.size });
