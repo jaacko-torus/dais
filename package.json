@@ -24,7 +24,7 @@
 	"repository": {
 		"url": "https://github.com/jaacko-torus/dais.git"
 	},
-	"homepage": "the-dais.herokuapp.com",
+	"homepage": "http://the-dais.herokuapp.com",
 	"license": "MIT",
 	"keywords": []
 }

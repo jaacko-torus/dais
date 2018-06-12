@@ -52,7 +52,7 @@ Keep the use of the `&&` operand to a minimum
 
 ### Security
 
-~
+
 
 ## `0.5.2` - 2018-6-10
 ### Change
@@ -62,13 +62,13 @@ Keep the use of the `&&` operand to a minimum
 - `debug && world -> navigation`: setting `world.mouse.click.boolean` to `false` now works perfectly.
 - `mouse`: the user is capable of changing the values of coordinates outside of the map, only in the `x` coordinates.
 
-~
+
 
 ## `0.5.1` - 2018-6-9
 ### Fixed
 - `++ object -> player`: not drawing all players. Due to the fact that the index of images when drawing changed in `v0.5.0`, changed to corresponding.
 
-~
+
 
 ## `0.5.0` - 2018-6-9
 ### Added
@@ -81,7 +81,7 @@ Keep the use of the `&&` operand to a minimum
 ### Fixed
 - `mouse`: when mouse hover outside of the map, only in the `y` orientation, I get a strange error in line `321`: `Uncaught TypeError`. Caused by not declaring that there is no need to render if `world.map.data[index_l][index_y] != null`.
 
-~
+
 
 ## `0.4.2` - 2018-6-1
 ### Changed
@@ -93,7 +93,7 @@ Keep the use of the `&&` operand to a minimum
 - `+ world -> camera`: `world.camera.draw()` should be more universal, instead of being set to the `camera.size` of 5, it should be able to use the variable.
 - `world -> map && server`: `world.map[0]` had repeated values.
 
-~
+
 
 ## `0.4.1` - 2018-5-31
 ### Added
@@ -107,7 +107,7 @@ Keep the use of the `&&` operand to a minimum
 ## Deprecated
 - `world -> camera`: there is no need to draw the camera limit at `(0,0)`, only draw the one following the player.
 
-~
+
 
 ## `0.4.0` - 2018-5-30
 ### Added
@@ -127,7 +127,7 @@ Keep the use of the `&&` operand to a minimum
 - `client`: Some debugging and reformatting has to be done in `main.js`. It should be more readable.
 - `world -> camera`: when moving the camera away from the origin, the camera tries to keep itself as close to the origin.
 
-~
+
 
 ## `0.3.0` - 2018-3-22
 ### Added
@@ -143,7 +143,7 @@ Keep the use of the `&&` operand to a minimum
 ## Fixed
 - `world -> graphics`: Adding unnecessary image references. Some references point to nothing.
 
-~
+
 
 ## `0.2.0` - 2018-3-19
 ### Added
@@ -157,7 +157,7 @@ Keep the use of the `&&` operand to a minimum
 ### Security
 - `Object -> player`: **CHANGE** `I.name` to `writable: false`.
 
-~
+
 
 ## `0.1.0` - 2018-3-17
 ### Added

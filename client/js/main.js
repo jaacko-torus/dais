@@ -45,18 +45,21 @@ class player extends entity {
 	static update(data) { // Leave this function be static for now
 		// super.update();
 
-		//  loop through `data`        . If the player is not in `PLAYER_LIST` and is     in `data` , then create a new player
-		//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is not in `data` , then delete it
-		//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is     in `data` , then update & draw players
-		for( let id in data        ) { if( !PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = new player(data[id].x, data[id].y); } }
-		for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] && !data[id] ) { delete PLAYER_LIST[id] ;                           continue; } }
-		for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = data[id];                           } }
+		//  loop through `data`. If the player is not in `PLAYER_LIST` and is in `data`, then create a new player
+		for( let id in data        ) { if( !PLAYER_LIST[id] && data[id] ) { PLAYER_LIST[id] = new player(data[id].x, data[id].y) } }
+		
+		for( let id in PLAYER_LIST ) {
+			//  loop through `PLAYER_LIST` . If the player is not in `data` , then delete it
+			//  loop through `PLAYER_LIST` . If the player is     in `data` , then update & draw players
+			if( !data[id] ) { delete PLAYER_LIST[id]            }
+			if(  data[id] ) {        PLAYER_LIST[id] = data[id] }
 
-		for( let id in PLAYER_LIST ) { // update `I`
-			if( id === I.id ) {
+			if( id === I.id ) { // update I
 				I.x = PLAYER_LIST[id].x;
 				I.y = PLAYER_LIST[id].y;
 			}
+
+			world.map.data[1][-PLAYER_LIST[id].y + (world.map.size - 1) / 2][PLAYER_LIST[id].x + (world.map.size - 1) / 2] = 1;
 		}
 	}
 
@@ -175,40 +178,57 @@ var world = {
 	map: {
 		data: [],
 		size: 21,
-		layers: 3,
+
+		layer: {
+			size: 3,
+			indexing: {
+				"bottom"     : "0",
+				"mid_bottom" : undefined,
+				"mid_top"    : "1",
+				"top"        : "2",
+			}
+		},
+
+		command: {
+			default(l, y, x) {
+				if( l === parseInt(world.map.layer.indexing[ "bottom"     ] , 10) ) {     this.bottom(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "mid_bottom" ] , 10) ) { this.mid_bottom(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "mid_top"    ] , 10) ) {    this.mid_top(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "top"        ] , 10) ) {        this.top(l, y, x) }
+			},
+
+			bottom(l, y, x) { // terrain
+				ctx.drawImage(
+					world.preload.meta.map,
+		
+					world.preload.img.map[world.map.data[l][y][x]].x    ,
+					world.preload.img.map[world.map.data[l][y][x]].y    ,
+					world.preload.img.map[world.map.data[l][y][x]].size ,
+					world.preload.img.map[world.map.data[l][y][x]].size ,
+		
+					I.size * x ,
+					I.size * y ,
+					I.size ,
+					I.size
+				);
+			},
+			mid_bottom(l, y, x) {}, // static
+			mid_top(l, y, x) { // non-static
+	
+			},
+			top(l, y, x) { // events
+				if (world.map.data[l][y][x] === -1) { world.mouse.move.draw(y, x) }
+				if (world.map.data[l][y][x] === -2) { world.mouse.click.draw(y, x) }
+			},
+		},
 
 		update() {},
 
-		normal(l, y, x) {
-			let pre = world.preload;
-
-			ctx.drawImage(
-				pre.meta.map,
-
-				pre.img.map[this.data[l][y][x]].x    ,
-				pre.img.map[this.data[l][y][x]].y    ,
-				pre.img.map[this.data[l][y][x]].size ,
-				pre.img.map[this.data[l][y][x]].size ,
-
-				I.size * x ,
-				I.size * y ,
-				I.size ,
-				I.size
-			);
-		},
-
 		draw(vx, vy) { // do something with vecotrs later to only draw what is necessary
-			let pre = world.preload;
-
 			for(let l = 0; l < this.data.length; l++) {
 				for(let y = 0; y < this.size; y++) {
 					for(let x = 0; x < this.size; x++) {
-						if( pre.meta.map.loaded ) {
-							if( this.data[l][y][x] > 0 ) { this.normal(l, y, x) }
-							// if( this.data[l][y][x] = 0 ) { world.mouse.move.draw(l, y, x) }
-							if( this.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x) }
-							if( this.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) }
-						}
+						if( world.preload.meta.map.loaded ) { this.command.default(l, y, x) }
 					}
 				}
 			}
