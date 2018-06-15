@@ -1,5 +1,5 @@
 var DEBUG = {
-	chat   : false,
+	chat   : true,
 	camera : false,
 	grid   : false,
 };
@@ -45,17 +45,32 @@ class player extends entity {
 	static update(data) { // Leave this function be static for now
 		// super.update();
 
-		//  loop through `data`        . If the player is not in `PLAYER_LIST` and is     in `data` , then create a new player
-		//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is not in `data` , then delete it
-		//  loop through `PLAYER_LIST` . If the player is     in `PLAYER_LIST` and is     in `data` , then update & draw players
-		for( let id in data        ) { if( !PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = new player(data[id].x, data[id].y); } }
-		for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] && !data[id] ) { delete PLAYER_LIST[id] ;                           continue; } }
-		for( let id in PLAYER_LIST ) { if(  PLAYER_LIST[id] &&  data[id] ) {        PLAYER_LIST[id] = data[id];                           } }
+		//  loop through `data`. If the player is not in `PLAYER_LIST` and is in `data`, then create a new player
+		for( let id in data        ) { if( !PLAYER_LIST[id] ) { PLAYER_LIST[id] = new player(data[id].x, data[id].y) } }
+		
+		for( let id in PLAYER_LIST ) {
+			//  loop through `PLAYER_LIST` . If the player is not in `data` , then delete it
+			//  loop through `PLAYER_LIST` . If the player is     in `data` , then update & draw players
+			if( !data[id] ) { delete PLAYER_LIST[id]            }
+			if(  data[id] ) {        PLAYER_LIST[id] = data[id] }
 
-		for( let id in PLAYER_LIST ) { // update `I`
-			if( id === I.id ) {
+			if( id === I.id ) { // update I
 				I.x = PLAYER_LIST[id].x;
 				I.y = PLAYER_LIST[id].y;
+			}
+
+			let index_l =  1;
+			let index_y = -PLAYER_LIST[id].y + (world.map.size - 1) / 2;
+			let index_x =  PLAYER_LIST[id].x + (world.map.size - 1) / 2;
+
+			for(let y = 0; y < world.map.size; y++) {
+				for(let x = 0; x < world.map.size; x++) {
+					if(world.map.data[index_l][y][x] === 1) { world.map.data[index_l][y][x] = 0 }
+				}
+			}
+
+			if (world.map.data[1][index_y]) {
+				world.map.data[1][index_y][index_x] = 1;
 			}
 		}
 	}
@@ -63,33 +78,6 @@ class player extends entity {
 	static draw(data) {
 		// FIX: make this function non-static so that the next line is doable
 		// super.draw();
-		let pre = world.preload;
-
-
-		for( let player in PLAYER_LIST ) {
-
-			// if player exists in `PLAYER_LIST` & `data` and his image is loaded, then render
-			if( PLAYER_LIST[player] && data[player] && pre.meta.player.loaded && world.map.size) {
-				let player_image;
-
-				if( player === I.id ) { player_image = I.img }
-				if( player !== I.id ) { player_image =     1 }
-
-				ctx.drawImage(
-					pre.meta.player,
-
-					pre.img.player[player_image].x,
-					pre.img.player[player_image].y,
-					pre.img.player[player_image].size,
-					pre.img.player[player_image].size,
-
-					 ((I.size * PLAYER_LIST[player].x)) + (I.size * (world.map.size - 1) / 2),
-					-((I.size * PLAYER_LIST[player].y)) + (I.size * (world.map.size - 1) / 2),
-					I.size,
-					I.size
-				);
-			}
-		}
 	}
 }
 
@@ -141,7 +129,7 @@ var world = {
 				let margin_y = this.meta[name].add_height;
 
 				this.meta[name] = new Image();
-				this.meta[name].onload = function() {
+				this.meta[name].onload = () => {
 					this.loaded = true;
 					this.sub_image_size = world.preload.sub_image_size;
 
@@ -175,40 +163,47 @@ var world = {
 	map: {
 		data: [],
 		size: 21,
-		layers: 3,
+
+		command: {
+			default(l, y, x) {
+				if( l === parseInt(world.map.layer.indexing[ "bottom"     ] , 10) ) {     this.bottom(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "mid_bottom" ] , 10) ) { this.mid_bottom(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "mid_top"    ] , 10) ) {    this.mid_top(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "top"        ] , 10) ) {        this.top(l, y, x) }
+			},
+
+			draw(l, y, x, src) {
+				ctx.drawImage(
+					world.preload.meta[src],
+
+					world.preload.img[src][world.map.data[l][y][x]].x,
+					world.preload.img[src][world.map.data[l][y][x]].y,
+					world.preload.img[src][world.map.data[l][y][x]].size,
+					world.preload.img[src][world.map.data[l][y][x]].size,
+
+					I.size * x,
+					I.size * y,
+					I.size,
+					I.size
+				);
+			},
+
+			bottom(l, y, x)     { this.draw( l, y, x, "map"    ) }, // terrain
+			mid_bottom(l, y, x) {}, // static
+			mid_top(l, y, x)    { this.draw( l, y, x, "player" ) }, // non-static
+			top(l, y, x) { // events
+				if( world.map.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x)  }
+				if( world.map.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) }
+			},
+		},
 
 		update() {},
 
-		normal(l, y, x) {
-			let pre = world.preload;
-
-			ctx.drawImage(
-				pre.meta.map,
-
-				pre.img.map[this.data[l][y][x]].x    ,
-				pre.img.map[this.data[l][y][x]].y    ,
-				pre.img.map[this.data[l][y][x]].size ,
-				pre.img.map[this.data[l][y][x]].size ,
-
-				I.size * x ,
-				I.size * y ,
-				I.size ,
-				I.size
-			);
-		},
-
 		draw(vx, vy) { // do something with vecotrs later to only draw what is necessary
-			let pre = world.preload;
-
 			for(let l = 0; l < this.data.length; l++) {
 				for(let y = 0; y < this.size; y++) {
 					for(let x = 0; x < this.size; x++) {
-						if( pre.meta.map.loaded ) {
-							if( this.data[l][y][x] > 0 ) { this.normal(l, y, x) }
-							// if( this.data[l][y][x] = 0 ) { world.mouse.move.draw(l, y, x) }
-							if( this.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x) }
-							if( this.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) }
-						}
+						if( world.preload.meta.map.loaded ) { this.command.default(l, y, x) }
 					}
 				}
 			}
@@ -229,8 +224,6 @@ var world = {
 
 			world.map.draw();
 
-			player.draw(data);
-
 			ctx.resetTransform();
 		},
 		update() {
@@ -248,12 +241,13 @@ var world = {
 			if( py < this.center.y - this.area ) { this.center.y -= I.size; this.vector.y +=  1; }
 		},
 		draw() { // a function for making dashed lines based on grid tiles
+			// FIX: doesn't quite work for any camera, should be more flexible
 			var dashed_line = function(x1, y1, x2, y2) {
 				ctx.beginPath();
 				ctx.setLineDash([2, 1])
-				ctx.moveTo(x1 * I.size - 0.25, y1 * I.size - 0.25);
-				ctx.lineTo(x2 * I.size - 0.25, y2 * I.size - 0.25);
-				ctx.lineWidth = 2;
+				ctx.moveTo(x1 * I.size - 0.5, y1 * I.size - 0.5);
+				ctx.lineTo(x2 * I.size - 0.5, y2 * I.size - 0.5);
+				ctx.lineWidth = 4;
 				ctx.strokeStyle = "#686868";
 				ctx.stroke();
 			}
@@ -295,7 +289,8 @@ var world = {
 
 		observe(type) {
 			var e = type;
-			if( type === "move" ) { e = "mousemove"; }
+			
+			if( type === "move" ) { e = "mousemove" }
 			let boolean = this[type].boolean;
 
 			if(  boolean ) {    canvas.addEventListener(e, this[type].update, false) }
@@ -317,15 +312,15 @@ var world = {
 
 				// if the mouse is outside of the map, there is no need to color it.
 				// erase all elements that do not match the mouse position
-				for(y = 0; y < world.map.size; y++) {
-					for(x = 0; x < world.map.size; x++) {
+				for(let y = 0; y < world.map.size; y++) {
+					for(let x = 0; x < world.map.size; x++) {
 						if(world.map.data[index_l][y][x] === -1) { world.map.data[index_l][y][x] = 0 }
 					}
 				}
 				// fill the corresponding square based on where th cursor is
 				if(
 					world.map.data[index_l][index_y] != null &&
-					world.map.data[index_l][index_y][index_x] <= 0 &&
+					world.map.data[index_l][index_y][index_x] == 0 &&
 					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
 				) { world.map.data[index_l][index_y][index_x] = -1 }
@@ -355,15 +350,15 @@ var world = {
 				let index_y = -world.mouse.tile_selected.y + (world.map.size - 1) / 2;
 				let index_x =  world.mouse.tile_selected.x + (world.map.size - 1) / 2;
 
-				for(y = 0; y < world.map.size; y++) {
-					for(x = 0; x < world.map.size; x++) {
+				for(let y = 0; y < world.map.size; y++) {
+					for(let x = 0; x < world.map.size; x++) {
 						if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = 0 }
 					}
 				}
 
 				if(
 					world.map.data[index_l][index_y] != null &&
-					world.map.data[index_l][index_y][index_x] <= 0 &&
+					(world.map.data[index_l][index_y][index_x] == 0 || world.map.data[index_l][index_y][index_x] === -1) &&
 					world.mouse.tile_selected.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.tile_selected.y === -index_y + (world.map.size - 1) / 2
 				) { world.map.data[index_l][index_y][index_x] = -2; world.mouse.click.infolog(index_x, index_y); }
@@ -392,14 +387,14 @@ var world = {
 		server_emit(direction, position) { socket.emit("key_press", { input_id: direction , state: position }) },
 
 		emit_keys(position) {
-			if( position === "down" ) { position = true  }
-			if( position === "up"   ) { position = false }
+			// if( position === "down" ) { position = true  }
+			// if( position === "up"   ) { position = false }
 
 			return (e) => {
-				if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { this.server_emit( "left"  , position ) }
-				if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { this.server_emit( "up"    , position ) }
-				if( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) { this.server_emit( "right" , position ) }
-				if( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) { this.server_emit( "down"  , position ) }
+				if( position && ( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) ) { this.server_emit( "left"  , position ) }
+				if( position && ( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) ) { this.server_emit( "up"    , position ) }
+				if( position && ( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) ) { this.server_emit( "right" , position ) }
+				if( position && ( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) ) { this.server_emit( "down"  , position ) }
 			}
 		},
 
@@ -457,20 +452,21 @@ socket.on("connection", function(data) {
 		}
 	}
 
-	I.id   = data.me.id,
-	I.x    = data.me.x,
-	I.y    = data.me.y,
-	// I.size = data.me.size,
-	I.img  = data.me.img,
+	I.x    = data.me.x;
+	I.y    = data.me.y;
+	I.id   = data.me.id;
+	I.img  = data.me.img;
+	I.size = data.me.size;
 
-	Object.assign(world.map, { data: data.world.map , size: data.world.size });
+	Object.assign(world.map, { data: data.world.map, size: data.world.size });
+	world.map.layer = data.world.layer;
 
 	world.preload.load_atlas();
 
 	console.info(data.world.msg);
 });
 
-socket.on("new_map", function(data) { Object.assign(world, { map: data.world.map , size: data.world.size }) });
+socket.on("new_map", function(data) { Object.assign(world, { map: data.world.map , size: data.world.size , layers}) });
 
 
 // --------------------------------------------------------------------------------------------------------------------

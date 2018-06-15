@@ -9,7 +9,7 @@ The Dais is a multiplayer 2d orthogonal game similar to that of Zelda.
 
 ## DEBUG
 
-In `app.js` the `const DEBUG = false` by default. This means that you will be able to type `/<command>` into the chat, `<command>` being replaced by JavaScript which will be `eval`ed in the server. This is done so that it is easier to debug the server. To send back information from the server to the client use `/emit_debug(socket, p, { msg: <command> })`. It is so long and explicit so that the client notices less that the function exists.
+In `app.js` the `const DEBUG = false` by default. This means that you will be able to type `/<command>` into the chat, `<command>` being replaced by JavaScript which will be `eval`ed in the server. This is done so that it is easier to debug the server. To send back information from the server to the client use `;emit_debug(socket, p, { msg: <command> })`. It is so long and explicit so that the client notices less that the function exists.
 
 In debug mode a grid will be displayed as well as a virtual camera to know how the camera works.
 

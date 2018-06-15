@@ -12,6 +12,7 @@ These are the categories which the whole
 - `client`
 - `debug`
 - `express`
+- `npm`
 - `object -> entity`
 - `object -> player`
 - `object -> self`
@@ -32,9 +33,8 @@ Keep the use of the `&&` operand to a minimum
 - `world -> navigation`: allow the player to see the movements it's going to make before it does.
 
 ### Change
+- `object -> player`: player should not move outside of the confines of the world.
 - `world -> images`: selection of images should be based on coordinates instead of index from top left corner, going right then down.
-- `server`: the server should include what image it will be rendering for each player, right now in the static `player.draw`, the client decides what image to use for players other than itself.
-- `server && world -> map`: player should be rendered inside of the map instead of on top of it.
 - `server`: the server should not give the layers dedicated for user interaction to the user, because these layers are only modified and cared about by the user.
 - `world -> map`: `layer` should change according to what the server dictates. *not sure what I meant to say*
 - `server`: I don't need to send information to clients all the time, only when they move. Remove the `setTimeout` in favor of something more efficient. *maybe?*
@@ -56,7 +56,10 @@ Keep the use of the `&&` operand to a minimum
 
 ## `0.5.2` - 2018-6-10
 ### Change
-- `server`: `world.build` should define properties with no value as `0` instead of `undefined`, as stated in `v0.4.2`
+- `server`: `world.build` should define properties with no value as `0` instead of `undefined`, as stated in `v0.4.2`.
+- `server && world -> map`: player should be rendered inside of the map instead of on top of it.
+- `server`: the server should include what image it will be rendering for each player, right now in the static `player.draw`, the client decides what image to use for players other than itself.
+- `npm`: now using `npm shrinkwrap`
 
 ### Fix
 - `debug && world -> navigation`: setting `world.mouse.click.boolean` to `false` now works perfectly.
