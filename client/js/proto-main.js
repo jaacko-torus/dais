@@ -91,7 +91,7 @@ class self extends player {
 	}
 
 	// FIX: fake solution down ahead
-	move( direction ) { world.keyboard.server_emit(direction, true); world.keyboard.server_emit(direction, false); }
+	move( direction ) { world.keyboard.move_emit(direction, true); world.keyboard.move_emit(direction, false); }
 
 	update() { super.update() }
 	draw() { super.draw() }
@@ -129,7 +129,7 @@ var world = {
 				let margin_y = this.meta[name].add_height;
 
 				this.meta[name] = new Image();
-				this.meta[name].onload = () => {
+				this.meta[name].onload = function() {
 					this.loaded = true;
 					this.sub_image_size = world.preload.sub_image_size;
 
@@ -187,6 +187,7 @@ var world = {
 					I.size
 				);
 			},
+
 
 			bottom(l, y, x)     { this.draw( l, y, x, "map"    ) }, // terrain
 			mid_bottom(l, y, x) {}, // static
@@ -384,29 +385,32 @@ var world = {
 			down  : false
 		},
 
-		server_emit(direction, position) { socket.emit("key_press", { input_id: direction , state: position }) },
+		move_emit(direction) { socket.emit("move", direction) },
 
 		emit_keys(position) {
 			// if( position === "down" ) { position = true  }
 			// if( position === "up"   ) { position = false }
 
 			return (e) => {
-				if( position && ( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) ) { this.server_emit( "left"  , position ) }
-				if( position && ( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) ) { this.server_emit( "up"    , position ) }
-				if( position && ( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) ) { this.server_emit( "right" , position ) }
-				if( position && ( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) ) { this.server_emit( "down"  , position ) }
+				if( position && ( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) ) { this.move_emit( "left"  ) }
+				if( position && ( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) ) { this.move_emit( "up"    ) }
+				if( position && ( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) ) { this.move_emit( "right" ) }
+				if( position && ( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) ) { this.move_emit( "down"  ) }
 			}
 		},
 
 		update(boolean) {
-			if(  boolean ) {    document.addEventListener("keydown", this.emit_keys("down"), false);    document.addEventListener("keyup", this.emit_keys("up"), false); }
-			if( !boolean ) { document.removeEventListener("keydown", this.emit_keys("down"), false); document.removeEventListener("keyup", this.emit_keys("up"), false); }
+			// if(  boolean ) {    document.addEventListener("keydown", this.emit_keys("down"), false);    document.addEventListener("keyup", this.emit_keys("up"), false); }
+			// if( !boolean ) { document.removeEventListener("keydown", this.emit_keys("down"), false); document.removeEventListener("keyup", this.emit_keys("up"), false); }
+			if(  boolean ) {    document.addEventListener("keypress", this.emit_keys("down"), false) }
+			if( !boolean ) { document.removeEventListener("keypress", this.emit_keys("down"), false) }
 		}
 	},
 
 	update() {
-		this.keyboard.update(this.keyboard.boolean);
+		this.keyboard.update(this.keyboard.boolean); // this should be called `listener` instead, and be called only once.
 
+		// same with these two
 		this.mouse.observe("move");
 		this.mouse.observe("click");
 	},
@@ -446,11 +450,8 @@ function draw(data) {
 var socket = io();
 
 socket.on("connection", function(data) {
-	if(data.world.debug) { // CHANGE: make this shorter with `map` or something.
-		for(let prop in DEBUG) {
-			DEBUG[prop] = true;
-		}
-	}
+	// CHANGE: make this shorter with `map` or something.
+	if(data.world.debug) { for(let prop in DEBUG) { DEBUG[prop] = true } }
 
 	I.x    = data.me.x;
 	I.y    = data.me.y;

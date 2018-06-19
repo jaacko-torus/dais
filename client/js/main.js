@@ -127,7 +127,9 @@ var world = {
 				let margin_y = this.meta[name].add_height;
 
 				this.meta[name] = new Image();
-				this.meta[name].onload = () => {
+				this.meta[name].loaded = false;
+
+				this.meta[name].onload = function() {
 					this.loaded = true;
 					this.sub_image_size = world.preload.sub_image_size;
 
@@ -201,7 +203,7 @@ var world = {
 			for(let l = 0; l < this.data.length; l++) {
 				for(let y = 0; y < this.size; y++) {
 					for(let x = 0; x < this.size; x++) {
-						if(world.preload.meta.map.loaded) { this.command.default(l, y, x) }
+						if(world.preload.meta.map.loaded) { this.command.default(l, y, x); }
 					}
 				}
 			}
@@ -303,7 +305,7 @@ var world = {
 					x:  Math.floor( ( evt.clientX - rect.left ) / I.size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
 					y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 				};
-				// console.log(world.mouse.position);
+
 				let index_l =  world.map.data.length  - 1;
 				let index_y = -world.mouse.position.y + (world.map.size - 1) / 2;
 				let index_x =  world.mouse.position.x + (world.map.size - 1) / 2;
@@ -387,7 +389,7 @@ var world = {
 		emit_keys(position) {
 			if( position === "down" ) { position = true  }
 			if( position === "up"   ) { position = false }
-
+			
 			return (e) => {
 				if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { this.server_emit( "left"  , position ) }
 				if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { this.server_emit( "up"    , position ) }

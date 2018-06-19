@@ -11,12 +11,12 @@ var server  = require("http").createServer(app);
 var io      = require("socket.io").listen(server);
 
 var world   = require("./server/methods/world.js");
-var player  = require("./server/classes/player.js");
+var player  = require("./server/classes/proto-player");
 var update_pckgs = require("./server/functions/update_pckgs.js");
 
 /* routing */
 
-console.log("Server started.");
+console.info("Server started.");
 
 app.get("/", function(req, res) {
 	res.sendFile( __dirname + "/client/index.html" );
@@ -25,16 +25,17 @@ app.get("/", function(req, res) {
 app.use(express.static("client"));
 
 server.listen(process.env.PORT || 8080, () => {
-	console.log("Now listening on port 8080\n");
+	console.info("Now listening on port 8080\n");
+
+
+	// --------------------------------------------------------------------------------------------------------------------
+
+
+	/* make the world once, after server is listening */
+	world.make(world.size, world.size, world.layer.size);
+
+	if(world.map) { console.info("The world has been made"); }
 });
-
-
-// --------------------------------------------------------------------------------------------------------------------
-
-
-/* world methods */
-
-world.make(world.size, world.size, world.layer.size);
 
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -42,7 +43,7 @@ world.make(world.size, world.size, world.layer.size);
 
 /* sockets */
 
-io.sockets.on("connection", function(socket) {
+io.sockets.on("connection", (socket) => {
 	let id = socket.id;
 	let p  = new player();
 
@@ -56,14 +57,14 @@ io.sockets.on("connection", function(socket) {
 		if(data.from.id === id && data.msg[0] !== ";") {  // if user has matching credentials
 
 			//  if user has a name & it matches provided name, then broadcast message
-			//  if user has a name & it doesn't match provided name, then tell them they can't do that and refuse to send message
-			//  if name hasn't been set, then set the name and send message
-			
 			if(  p.name && data.from.name === p.name ) { socket.broadcast.emit("add_to_chat", { from: {name: p.name}, msg: data.msg }) }
+
+			//  if user has a name & it doesn't match provided name, then tell them they can't do that and refuse to send message
 			if(  p.name && data.from.name !== p.name ) { socket.emit("add_to_chat", { from: {name: ";", id: ";" }, msg: "You can't change your name!", my_name: p.name }); }
+
+			//  if name hasn't been set, then set the name and send message
 			if( !p.name  ) {
 				Object.defineProperty(p, "name", { value: data.from.name, writable: false });
-
 				socket.emit("add_to_chat", { from: { name: ";" , id: ";" }, msg: `Your session name is now: ${p.name}`, my_name: p.name });
 				socket.broadcast.emit("add_to_chat", { from: { name: p.name }, msg: data.msg });
 			}
@@ -92,6 +93,6 @@ function emit_debug(socket, p, data) { socket.emit("debug", data.msg) }
 
 setInterval(() => {
 	var pack = update_pckgs();
-
+	
 	io.emit("update", pack);
 }, ( 1000/10 ) ); // prev 1000 / 8
