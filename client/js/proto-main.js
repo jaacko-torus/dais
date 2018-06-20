@@ -22,6 +22,8 @@ ctx.font = "30px Arial";
 // --------------------------------------------------------------------------------------------------------------------
 
 
+let I;
+
 // world
 
 var world = {
@@ -342,8 +344,6 @@ var world = {
 
 
 /* classes */
-
-let I;
 
 class Entity {
 	constructor(x, y, size) {

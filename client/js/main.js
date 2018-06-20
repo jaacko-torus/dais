@@ -21,6 +21,8 @@ ctx.font = "30px Arial";
 // --------------------------------------------------------------------------------------------------------------------
 
 
+let I;
+
 // world
 
 var world = {
@@ -79,10 +81,10 @@ var world = {
 
 		command: {
 			default(l, y, x) {
-				if( l === parseInt(world.map.layer.indexing[ "bottom"     ] , 10) ) {     this.bottom(l, y, x) }
-				if( l === parseInt(world.map.layer.indexing[ "mid_bottom" ] , 10) ) { this.mid_bottom(l, y, x) }
-				if( l === parseInt(world.map.layer.indexing[ "mid_top"    ] , 10) ) {    this.mid_top(l, y, x) }
-				if( l === parseInt(world.map.layer.indexing[ "top"        ] , 10) ) {        this.top(l, y, x) }
+				if( l === parseInt(world.map.layer.indexing[ "bottom"     ] , 10) ) {     this.bottom(l, y, x); }
+				if( l === parseInt(world.map.layer.indexing[ "mid_bottom" ] , 10) ) { this.mid_bottom(l, y, x); }
+				if( l === parseInt(world.map.layer.indexing[ "mid_top"    ] , 10) ) {    this.mid_top(l, y, x); }
+				if( l === parseInt(world.map.layer.indexing[ "top"        ] , 10) ) {        this.top(l, y, x); }
 			},
 
 			draw(l, y, x, src) {
@@ -101,12 +103,12 @@ var world = {
 				);
 			},
 
-			bottom(l, y, x)     { this.draw( l, y, x, "map"    ) }, // terrain
+			bottom(l, y, x)     { this.draw( l, y, x, "map"    ); }, // terrain
 			mid_bottom(l, y, x) {}, // static
-			mid_top(l, y, x)    { this.draw( l, y, x, "player" ) }, // non-static
+			mid_top(l, y, x)    { this.draw( l, y, x, "player" ); }, // non-static
 			top(l, y, x) { // events
-				if( world.map.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x)  }
-				if( world.map.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) }
+				if( world.map.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x)  ; }
+				if( world.map.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) ; }
 			},
 		},
 
@@ -123,10 +125,11 @@ var world = {
 		}
 	},
 	camera: {
-		set size(n) { if(Number.isInteger(n) >= 0) { return n } },
-		size: 2, // must be positive
+		_size_: 2,
+		get size() { return this._size_ }, // must be positive
+		set size(n) { if(Number.isInteger(n) >= 0) { this._size_ = n; return n; } },
 		center: { x: undefined, y: undefined },
-		get area() { return this.size * I.size },
+		get area() { return this.size * I.size; },
 		vector: {x: 0, y: 0},
 
 		transform(data) {
@@ -144,8 +147,8 @@ var world = {
 			let py = (I.size * I.y) + (I.size * (world.map.size - 1) / 2); // player y
 
 			// since one cannot self reference properties to edit them, `this.center` is to be defined here if not previously done so
-			if( !this.center.x ) { this.center.x = (world.map.size - 1) * I.size / 2 }
-			if( !this.center.y ) { this.center.y = (world.map.size - 1) * I.size / 2 }
+			if( !this.center.x ) { this.center.x = (world.map.size - 1) * I.size / 2; }
+			if( !this.center.y ) { this.center.y = (world.map.size - 1) * I.size / 2; }
 
 			// setting the bounds of the camera
 			if( px > this.center.x + this.area ) { this.center.x += I.size; this.vector.x += -1; }
@@ -206,8 +209,8 @@ var world = {
 			if( type === "move" ) { e = "mousemove"; }
 			let boolean = this[type].boolean;
 
-			if(  boolean ) {    canvas.addEventListener(e, this[type].update, false) }
-			if( !boolean ) { canvas.removeEventListener(e, this[type].update, false) }
+			if(  boolean ) {    canvas.addEventListener(e, this[type].update, false); }
+			if( !boolean ) { canvas.removeEventListener(e, this[type].update, false); }
 		},
 
 		move: {
@@ -227,7 +230,7 @@ var world = {
 				// erase all elements that do not match the mouse position
 				for(let y = 0; y < world.map.size; y++) {
 					for(let x = 0; x < world.map.size; x++) {
-						if(world.map.data[index_l][y][x] === -1) { world.map.data[index_l][y][x] = 0 }
+						if(world.map.data[index_l][y][x] === -1) { world.map.data[index_l][y][x] = 0; }
 					}
 				}
 				// fill the corresponding square based on where th cursor is
@@ -236,7 +239,7 @@ var world = {
 					world.map.data[index_l][index_y][index_x] == 0 &&
 					world.mouse.position.x ===  index_x - (world.map.size - 1) / 2 &&
 					world.mouse.position.y === -index_y + (world.map.size - 1) / 2
-				) { world.map.data[index_l][index_y][index_x] = -1 }
+				) { world.map.data[index_l][index_y][index_x] = -1; }
 			},
 			draw(y, x) {
 				ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
@@ -250,7 +253,7 @@ var world = {
 		},
 		click: {
 			boolean: true,
-			infolog(x, y) { console.info(`You have selected coordinates {${world.mouse.tile_selected.x}, ${world.mouse.tile_selected.y}}`) },
+			infolog(x, y) { console.info(`You have selected coordinates {${world.mouse.tile_selected.x}, ${world.mouse.tile_selected.y}}`); },
 
 			update(evt) {
 				let rect = canvas.getBoundingClientRect();
@@ -265,7 +268,7 @@ var world = {
 
 				for(let y = 0; y < world.map.size; y++) {
 					for(let x = 0; x < world.map.size; x++) {
-						if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = 0 }
+						if(world.map.data[index_l][y][x] === -2) { world.map.data[index_l][y][x] = 0; }
 					}
 				}
 
@@ -339,8 +342,6 @@ var world = {
 
 
 /* classes */
-
-var I;
 
 class Entity {
 	constructor(x, y, size) {

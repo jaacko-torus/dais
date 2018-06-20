@@ -11,7 +11,7 @@ var server  = require("http").createServer(app);
 var io      = require("socket.io").listen(server);
 
 var world   = require("./server/methods/world.js");
-var player  = require("./server/classes/player.js");
+var Player  = require("./server/classes/player.js");
 var update_pckgs = require("./server/functions/update_pckgs.js");
 
 /* routing */
@@ -51,9 +51,9 @@ io.sockets.on("connection", function(socket) {
 	}
 	
 	function emit_debug(socket, p, data) { socket.emit("debug", data.msg); }
-	
+
 	let id = socket.id;
-	let p  = new player();
+	let p  = new Player();
 
 	p.on_connect(socket, id);
 
