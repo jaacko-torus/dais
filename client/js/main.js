@@ -18,93 +18,6 @@ canvas.height = 336; // document.body.clientHeight;
 
 ctx.font = "30px Arial";
 
-
-// --------------------------------------------------------------------------------------------------------------------
-
-
-/* classes */
-
-class entity {
-	constructor(x, y, size) {
-		this.x    =    x;
-		this.y    =    y;
-		this.size = size;
-	}
-
-	get position() { return `${this.x}, ${this.y}` }
-
-	update() {}
-	draw() {}
-}
-
-var PLAYER_LIST = {};
-
-class player extends entity {
-	constructor(x, y, size) { super(x, y, size) }
-
-	static update(data) { // Leave this function be static for now
-		// super.update();
-
-		//  loop through `data`. If the player is not in `PLAYER_LIST` and is in `data`, then create a new player
-		for( let id in data ) { if( !PLAYER_LIST[id] ) { PLAYER_LIST[id] = new player(data[id].x, data[id].y) } }
-		
-		for( let id in PLAYER_LIST ) {
-			//  loop through `PLAYER_LIST` . If the player is not in `data` , then delete it
-			//  loop through `PLAYER_LIST` . If the player is     in `data` , then update & draw players
-			if( !data[id] ) { delete PLAYER_LIST[id]            }
-			if(  data[id] ) {        PLAYER_LIST[id] = data[id] }
-
-			if( id === I.id ) { // update I
-				I.x = PLAYER_LIST[id].x;
-				I.y = PLAYER_LIST[id].y;
-			}
-
-			let index_l =  1;
-			let index_y = -PLAYER_LIST[id].y + (world.map.size - 1) / 2;
-			let index_x =  PLAYER_LIST[id].x + (world.map.size - 1) / 2;
-
-			for(let y = 0; y < world.map.size; y++) {
-				for(let x = 0; x < world.map.size; x++) {
-					if(world.map.data[index_l][y][x] === 1) { world.map.data[index_l][y][x] = 0 }
-				}
-			}
-
-			if (world.map.data[1][index_y]) { world.map.data[1][index_y][index_x] = 1 }
-		}
-	}
-
-	static draw(data) {
-		// FIX: make this function non-static so that the next line is doable
-		// super.draw();
-	}
-}
-
-class self extends player {
-	constructor(id, x, y, size, img, my_name) {
-		super(x, y, size);
-
-		this.id      =      id;
-		this.img     =     img;
-		this.my_name = my_name;
-	}
-
-	// FIX: fake solution down ahead
-	move( direction ) { world.keyboard.server_emit(direction, true); world.keyboard.server_emit(direction, false); }
-
-	update() { super.update() }
-	draw() { super.draw() }
-}
-
-var I = new self(
-	"not connected - no id given",
-	0,
-	0,
-	16,
-	1,
-	"" // my_name
-);
-
-
 // --------------------------------------------------------------------------------------------------------------------
 
 
@@ -133,8 +46,8 @@ var world = {
 					this.loaded = true;
 					this.sub_image_size = world.preload.sub_image_size;
 
-					if( margin_x ) { this.width  += margin_x }
-					if( margin_y ) { this.height += margin_y }
+					if( margin_x ) { this.width  += margin_x; }
+					if( margin_y ) { this.height += margin_y; }
 
 					world.preload.load_img_in_atlas(); // this is annoying
 				};
@@ -425,12 +338,103 @@ var world = {
 // --------------------------------------------------------------------------------------------------------------------
 
 
+/* classes */
+
+var I;
+
+class Entity {
+	constructor(x, y, size) {
+		this.x    =    x;
+		this.y    =    y;
+		this.size = size;
+	}
+
+	get position() { return `${this.x}, ${this.y}`; }
+
+	update() {}
+	draw() {}
+}
+
+var PLAYER_LIST = {};
+
+class Player extends Entity {
+	constructor(x, y, size) { super(x, y, size); }
+
+	static update(data) { // Leave this function be static for now
+		// super.update();
+
+		//  loop through `data`. If the player is not in `PLAYER_LIST` and is in `data`, then create a new player
+		for( let id in data ) { if( !PLAYER_LIST[id] ) { PLAYER_LIST[id] = new Player(data[id].x, data[id].y); } }
+		
+		for( let id in PLAYER_LIST ) {
+			//  loop through `PLAYER_LIST` . If the player is not in `data` , then delete it
+			//  loop through `PLAYER_LIST` . If the player is     in `data` , then update & draw players
+			if( !data[id] ) { delete PLAYER_LIST[id] ;           }
+			if(  data[id] ) {        PLAYER_LIST[id] = data[id]; }
+
+			if( id === I.id ) { // update I
+				I.x = PLAYER_LIST[id].x;
+				I.y = PLAYER_LIST[id].y;
+			}
+
+			let index_l =  1;
+			let index_y = -PLAYER_LIST[id].y + (world.map.size - 1) / 2;
+			let index_x =  PLAYER_LIST[id].x + (world.map.size - 1) / 2;
+
+			for(let y = 0; y < world.map.size; y++) {
+				for(let x = 0; x < world.map.size; x++) {
+					if(world.map.data[index_l][y][x] === 1) { world.map.data[index_l][y][x] = 0; }
+				}
+			}
+
+			if (world.map.data[1][index_y]) { world.map.data[1][index_y][index_x] = 1; }
+		}
+	}
+
+	static draw(data) {
+		// FIX: make this function non-static so that the next line is doable
+		// super.draw();
+	}
+}
+
+class Self extends Player {
+	constructor(id, x, y, size, img, my_name) {
+		super(x, y, size);
+
+		this.id      =      id;
+		this.img     =     img;
+		this.my_name = my_name;
+	}
+
+	// FIX: fake solution down ahead
+	move( direction ) {
+		world.keyboard.server_emit(direction,  true);
+		world.keyboard.server_emit(direction, false);
+	}
+
+	update() { super.update(); }
+	draw() { super.draw(); }
+}
+
+I = new Self(
+	"not connected - no id given",
+	0,
+	0,
+	16,
+	1,
+	"" // my_name
+);
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+
 // global update & draw functions
 
 function update(data) {
 	world.update();
 
-	player.update(data);
+	Player.update(data);
 }
 
 function draw(data) {

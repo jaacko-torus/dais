@@ -37,10 +37,10 @@ class player extends entity {
 	}
 
 	update_spd() {
-		if( this.pressing.left  ) { this.spd_x = -this.spd }
-		if( this.pressing.up    ) { this.spd_y =  this.spd }
-		if( this.pressing.right ) { this.spd_x =  this.spd }
-		if( this.pressing.down  ) { this.spd_y = -this.spd }
+		if( this.pressing.left  ) { this.spd_x = -this.spd; }
+		if( this.pressing.up    ) { this.spd_y =  this.spd; }
+		if( this.pressing.right ) { this.spd_x =  this.spd; }
+		if( this.pressing.down  ) { this.spd_y = -this.spd; }
 
 		if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
 		if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
@@ -50,22 +50,22 @@ class player extends entity {
 		PLAYER_LIST[id] = this;
 
 		socket.on("key_press", (data) => {
-			if( data.input_id === "left"  ) { this.pressing.left  = data.state }
-			if( data.input_id === "up"    ) { this.pressing.up    = data.state }
-			if( data.input_id === "right" ) { this.pressing.right = data.state }
-			if( data.input_id === "down"  ) { this.pressing.down  = data.state }
+			if( data.input_id === "left"  ) { this.pressing.left  = data.state; }
+			if( data.input_id === "up"    ) { this.pressing.up    = data.state; }
+			if( data.input_id === "right" ) { this.pressing.right = data.state; }
+			if( data.input_id === "down"  ) { this.pressing.down  = data.state; }
 		});
 		
 		socket.emit("connection", {
 			world : {
-				DEBUG : DEBUG       ,
+				DEBUG ,
 				map   : world.map   ,
 				size  : world.size  ,
 				layer : world.layer ,
 				msg   : `You are now connected!\nYour session id is now: ${id}`,
 			},
 			me    : {
-				id    : id          ,
+				id    ,
 				x     : this.x      ,
 				y     : this.y      ,
 				size  : this.size   ,
@@ -78,7 +78,7 @@ class player extends entity {
 	}
 
 	on_disconnect(socket, id) {
-		if( this.name ) { socket.broadcast.emit("add_to_chat", { from: { name: "/", id: "/" }, msg: `${this.name} has ended their session` }) }
+		if( this.name ) { socket.broadcast.emit("add_to_chat", { from: { name: "/", id: "/" }, msg: `${this.name} has ended their session` }); }
 		delete PLAYER_LIST[id];
 
 		console.log(`\nClosed connection: "${id}"`);

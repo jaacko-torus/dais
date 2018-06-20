@@ -11,7 +11,7 @@ var server  = require("http").createServer(app);
 var io      = require("socket.io").listen(server);
 
 var world   = require("./server/methods/world.js");
-var player  = require("./server/classes/proto-player");
+var Player  = require("./server/classes/proto-player");
 var update_pckgs = require("./server/functions/update_pckgs.js");
 
 /* routing */
@@ -44,8 +44,18 @@ server.listen(process.env.PORT || 8080, () => {
 /* sockets */
 
 io.sockets.on("connection", (socket) => {
+	function exec_debug(socket, p, data) {
+		if( DEBUG === true && data.msg[0] === ";" ) {
+			socket.emit("add_to_chat", { from: { name: ";", id: ";" }, msg: "You have issued a command" });
+			return eval(data.msg.substr(1));
+		}
+	}
+	
+	function emit_debug(socket, p, data) { socket.emit("debug", data.msg); }
+
+
 	let id = socket.id;
-	let p  = new player();
+	let p  = new Player();
 
 	p.on_connect(socket, id);
 
@@ -55,14 +65,12 @@ io.sockets.on("connection", (socket) => {
 
 	socket.on("send_msg_to_server", (data) => {
 		if(data.from.id === id && data.msg[0] !== ";") {  // if user has matching credentials
-
 			//  if user has a name & it matches provided name, then broadcast message
-			if(  p.name && data.from.name === p.name ) { socket.broadcast.emit("add_to_chat", { from: {name: p.name}, msg: data.msg }) }
-
 			//  if user has a name & it doesn't match provided name, then tell them they can't do that and refuse to send message
-			if(  p.name && data.from.name !== p.name ) { socket.emit("add_to_chat", { from: {name: ";", id: ";" }, msg: "You can't change your name!", my_name: p.name }); }
-
 			//  if name hasn't been set, then set the name and send message
+
+			if(  p.name && data.from.name === p.name ) { socket.broadcast.emit("add_to_chat", { from: {name: p.name}, msg: data.msg }); }
+			if(  p.name && data.from.name !== p.name ) { socket.emit("add_to_chat", { from: {name: ";", id: ";" }, msg: "You can't change your name!", my_name: p.name }); }
 			if( !p.name  ) {
 				Object.defineProperty(p, "name", { value: data.from.name, writable: false });
 				socket.emit("add_to_chat", { from: { name: ";" , id: ";" }, msg: `Your session name is now: ${p.name}`, my_name: p.name });
@@ -75,15 +83,6 @@ io.sockets.on("connection", (socket) => {
 		exec_debug(socket, p, data); // run command
 	});
 });
-
-function exec_debug(socket, p, data) {
-	if( DEBUG === true && data.msg[0] === ";" ) {
-		socket.emit("add_to_chat", { from: { name: ";", id: ";" }, msg: "You have issued a command" });
-		return eval(data.msg.substr(1));
-	}
-}
-
-function emit_debug(socket, p, data) { socket.emit("debug", data.msg) }
 
 
 // --------------------------------------------------------------------------------------------------------------------
