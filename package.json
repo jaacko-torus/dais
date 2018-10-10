@@ -4,7 +4,7 @@
 	"description": "The free multiplayer 2D Orthogonal RPG",
 	"main": "app.js",
 	"engines": {
-		"node": "10.1.0"
+		"node": "10.11.0"
 	},
 	"scripts": {
 		"start": "node app.js",
@@ -24,7 +24,7 @@
 	"repository": {
 		"url": "https://github.com/jaacko-torus/dais.git"
 	},
-	"homepage": "the-dais.herokuapp.com",
-	"license": "MIT",
+	"homepage": "https://the-dais.herokuapp.com",
+	"license": "Unlicense",
 	"keywords": []
 }

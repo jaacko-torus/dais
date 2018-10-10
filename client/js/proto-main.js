@@ -1,3 +1,53 @@
+// if browser doesn"t support WebSocket, just show some notification and exit
+if(!window.WebSocket) {
+	console.log("Sorry, but your browser doesn\'t support WebSockets.")
+}
+
+// open connection
+let HOST = location.origin.replace(/^http/, "ws");
+console.log(HOST);
+let ws = new WebSocket(HOST);
+
+
+
+function ws_send(event, data) { ws.send(JSON.stringify({event, data})); }
+
+ws.onopen = () => {
+	console.log("Do something when server opens");
+	ws_send("client_message", "hey");
+};
+
+ws.onerror = (error) => {
+	console.log("Sorry, but there\"s some problem with your connection or the server is down.");
+	console.log(error);
+};
+
+ws.onclose = () => {
+	console.log("The server has closed")
+};
+
+// most important part - incoming messages
+ws.onmessage = (message) => {
+	message = JSON.parse(message.data);
+	event(message.event, message.data);
+};
+
+var events = {
+	["server_message"](data) {
+		console.log(data);
+	}
+}
+
+function event(event, data) {
+	for(let type in events) {
+		if(event === type) { events[event](data); }
+	}
+};
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
+
 var DEBUG = {
 	chat   : true,
 	camera : false,
@@ -17,6 +67,7 @@ canvas.width  = 336; // document.body.clientWidth;
 canvas.height = 336; // document.body.clientHeight;
 
 ctx.font = "30px Arial";
+
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -42,14 +93,12 @@ var world = {
 				let margin_y = this.meta[name].add_height;
 
 				this.meta[name] = new Image();
-				this.meta[name].loaded = false;
+				this.meta[name].onload = () => {
+					this.meta[name].loaded = true;
+					this.meta[name].sub_image_size = world.preload.sub_image_size;
 
-				this.meta[name].onload = function() {
-					this.loaded = true;
-					this.sub_image_size = world.preload.sub_image_size;
-
-					if( margin_x ) { this.width  += margin_x; }
-					if( margin_y ) { this.height += margin_y; }
+					if( margin_x ) { this.meta[name].width  += margin_x; }
+					if( margin_y ) { this.meta[name].height += margin_y; }
 
 					world.preload.load_img_in_atlas(); // this is annoying
 				};
@@ -103,12 +152,13 @@ var world = {
 				);
 			},
 
+
 			bottom(l, y, x)     { this.draw( l, y, x, "map"    ); }, // terrain
 			mid_bottom(l, y, x) {}, // static
 			mid_top(l, y, x)    { this.draw( l, y, x, "player" ); }, // non-static
 			top(l, y, x) { // events
-				if( world.map.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x)  ; }
-				if( world.map.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x) ; }
+				if( world.map.data[l][y][x] === -1 ) { world.mouse.move.draw(y, x);  }
+				if( world.map.data[l][y][x] === -2 ) { world.mouse.click.draw(y, x); }
 			},
 		},
 
@@ -118,7 +168,7 @@ var world = {
 			for(let l = 0; l < this.data.length; l++) {
 				for(let y = 0; y < this.size; y++) {
 					for(let x = 0; x < this.size; x++) {
-						if(world.preload.meta.map.loaded) { this.command.default(l, y, x); }
+						if( world.preload.meta.map.loaded ) { this.command.default(l, y, x); }
 					}
 				}
 			}
@@ -128,6 +178,7 @@ var world = {
 		_size_: 2,
 		get size() { return this._size_; }, // must be positive
 		set size(n) { if(Number.isInteger(n) >= 0) { this._size_ = n; return n; } },
+
 		center: { x: undefined, y: undefined },
 		get area() { return this.size * I.size; },
 		vector: {x: 0, y: 0},
@@ -158,7 +209,7 @@ var world = {
 		},
 		draw() { // a function for making dashed lines based on grid tiles
 			// FIX: doesn't quite work for any camera, should be more flexible
-			var dashed_line = (x1, y1, x2, y2) => {
+			function dashed_line(x1, y1, x2, y2) {
 				ctx.beginPath();
 				ctx.setLineDash([2, 1]);
 				ctx.moveTo(x1 * I.size - 0.5, y1 * I.size - 0.5);
@@ -166,7 +217,7 @@ var world = {
 				ctx.lineWidth = 4;
 				ctx.strokeStyle = "#686868";
 				ctx.stroke();
-			};
+			}
 
 			let low  = -this.size + 10;
 			let high =  this.size + 11;
@@ -190,7 +241,7 @@ var world = {
 				ctx.stroke();
 
 				ctx.beginPath();
-				ctx.setLineDash([2, 2]);
+				ctx.setLineDash([2, 2])
 				ctx.moveTo( 0             - 0.25, i * I.size - 0.25 );
 				ctx.lineTo( canvas.height - 0.25, i * I.size - 0.25 );
 				ctx.lineWidth = 0.5;
@@ -204,8 +255,8 @@ var world = {
 		tile_selected: { x: undefined, y: undefined },
 
 		observe(type) {
-			var e = type;
-
+			let e = type;
+			
 			if( type === "move" ) { e = "mousemove"; }
 			let boolean = this[type].boolean;
 
@@ -221,7 +272,7 @@ var world = {
 					x:  Math.floor( ( evt.clientX - rect.left ) / I.size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
 					y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 				};
-
+				// console.log(world.mouse.position);
 				let index_l =  world.map.data.length  - 1;
 				let index_y = -world.mouse.position.y + (world.map.size - 1) / 2;
 				let index_x =  world.mouse.position.x + (world.map.size - 1) / 2;
@@ -300,29 +351,32 @@ var world = {
 			down  : false
 		},
 
-		server_emit(direction, position) { socket.emit("key_press", { input_id: direction , state: position }); },
+		move_emit(direction) { socket.emit("move", direction); },
 
 		emit_keys(position) {
-			if( position === "down" ) { position =  true;}
-			if( position === "up"   ) { position = false;}
-			
+			// if( position === "down" ) { position = true  }
+			// if( position === "up"   ) { position = false }
+
 			return (e) => {
-				if( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) { this.server_emit( "left"  , position ); }
-				if( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) { this.server_emit( "up"    , position ); }
-				if( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) { this.server_emit( "right" , position ); }
-				if( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) { this.server_emit( "down"  , position ); }
-			};
+				if( position && ( e.key === "A" || e.key === "a" || e.key === "ArrowLeft"  ) ) { this.move_emit( "left"  ); }
+				if( position && ( e.key === "W" || e.key === "w" || e.key === "ArrowUp"    ) ) { this.move_emit( "up"    ); }
+				if( position && ( e.key === "D" || e.key === "d" || e.key === "ArrowRight" ) ) { this.move_emit( "right" ); }
+				if( position && ( e.key === "S" || e.key === "s" || e.key === "ArrowDown"  ) ) { this.move_emit( "down"  ); }
+			}
 		},
 
 		update(boolean) {
-			if(  boolean ) {    document.addEventListener("keydown", this.emit_keys("down"), false);    document.addEventListener("keyup", this.emit_keys("up"), false); }
-			if( !boolean ) { document.removeEventListener("keydown", this.emit_keys("down"), false); document.removeEventListener("keyup", this.emit_keys("up"), false); }
+			// if(  boolean ) {    document.addEventListener("keydown", this.emit_keys("down"), false);    document.addEventListener("keyup", this.emit_keys("up"), false); }
+			// if( !boolean ) { document.removeEventListener("keydown", this.emit_keys("down"), false); document.removeEventListener("keyup", this.emit_keys("up"), false); }
+			if(  boolean ) {    document.addEventListener("keypress", this.emit_keys("down"), false); }
+			if( !boolean ) { document.removeEventListener("keypress", this.emit_keys("down"), false); }
 		}
 	},
 
 	update() {
-		this.keyboard.update(this.keyboard.boolean);
+		this.keyboard.update(this.keyboard.boolean); // this should be called `listener` instead, and be called only once.
 
+		// same with these two
 		this.mouse.observe("move");
 		this.mouse.observe("click");
 	},
@@ -333,7 +387,7 @@ var world = {
 		this.camera.transform(data);
 
 		if( DEBUG.camera ) { this.camera.draw(data); }
-		if( DEBUG.grid   ) { this.grid.draw();       }
+		if( DEBUG.grid ) { this.grid.draw(); }
 	},
 };
 
@@ -365,7 +419,7 @@ class Player extends Entity {
 		// super.update();
 
 		//  loop through `data`. If the player is not in `PLAYER_LIST` and is in `data`, then create a new player
-		for( let id in data ) { if( !PLAYER_LIST[id] ) { PLAYER_LIST[id] = new Player(data[id].x, data[id].y); } }
+		for( let id in data        ) { if( !PLAYER_LIST[id] ) { PLAYER_LIST[id] = new Player(data[id].x, data[id].y); } }
 		
 		for( let id in PLAYER_LIST ) {
 			//  loop through `PLAYER_LIST` . If the player is not in `data` , then delete it
@@ -373,13 +427,10 @@ class Player extends Entity {
 			if( !data[id] ) { delete PLAYER_LIST[id] ;           }
 			if(  data[id] ) {        PLAYER_LIST[id] = data[id]; }
 
-			// CHANGE: update position only if it doesn't go outside of world, add server logic first
-			if( id === I.id ) { // update I positions
+			if( id === I.id ) { // update I
 				I.x = PLAYER_LIST[id].x;
 				I.y = PLAYER_LIST[id].y;
 			}
-
-			// edit player position in `world.map.data`
 
 			let index_l =  1;
 			let index_y = -PLAYER_LIST[id].y + (world.map.size - 1) / 2;
@@ -391,8 +442,9 @@ class Player extends Entity {
 				}
 			}
 
-			// if location is not undefined(either 1 or 0) then mark location of player
-			if(world.map.data[1][index_y] && world.map.data[1][index_y][index_x] !== undefined) { world.map.data[1][index_y][index_x] = 1; }
+			if (world.map.data[1][index_y]) {
+				world.map.data[1][index_y][index_x] = 1;
+			}
 		}
 	}
 
@@ -412,10 +464,7 @@ class Self extends Player {
 	}
 
 	// FIX: fake solution down ahead
-	move( direction ) {
-		world.keyboard.server_emit(direction,  true);
-		world.keyboard.server_emit(direction, false);
-	}
+	move( direction ) { world.keyboard.move_emit(direction, true); world.keyboard.move_emit(direction, false); }
 
 	update() { super.update(); }
 	draw() { super.draw(); }
@@ -455,11 +504,8 @@ function draw(data) {
 var socket = io();
 
 socket.on("connection", (data) => {
-	if(data.world.debug) { // CHANGE: make this shorter with `map` or something.
-		for(let prop in DEBUG) {
-			DEBUG[prop] = true;
-		}
-	}
+	// CHANGE: make this shorter with `map` or something.
+	if(data.world.debug) { for(let prop in DEBUG) { DEBUG[prop] = true; } }
 
 	I.x    = data.me.x;
 	I.y    = data.me.y;
@@ -506,7 +552,7 @@ chat.form.onsubmit = (e) => {
 };
 
 
-if( DEBUG.chat ) { socket.on("debug", (data) => { console.log(data); }); }
+if( DEBUG.chat ) { socket.on("debug", (data) => { console.log(data) }) }
 
 
 // --------------------------------------------------------------------------------------------------------------------
