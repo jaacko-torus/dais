@@ -2,14 +2,15 @@ const DEBUG  = require("../variables/debug.js");
 
 var entity = require("./entity.js");
 
-var PLAYER_LIST = require("../variables/player_list.js");
+var entity_list = require("../variables/entity_list.js");
+var player_list = require("../variables/player_list.js");
 
 var world  = require("../methods/world.js");
 
 
 
 class player extends entity {
-	constructor(x, y, spd_x = 0, spd_y = 0, img = 1) {
+	constructor(x, y, spd_x = 0, spd_y = 0, img = 2) {
 		super(img, x, y);
 
 		this.spd_x = spd_x;
@@ -47,7 +48,7 @@ class player extends entity {
 	}
 
 	on_connect(socket, id) {
-		PLAYER_LIST[id] = this;
+		player_list[id] = this;
 
 		socket.on("key_press", (data) => {
 			if( data.input_id === "left"  ) { this.pressing.left  = data.state; }
@@ -79,7 +80,7 @@ class player extends entity {
 
 	on_disconnect(socket, id) {
 		if( this.name ) { socket.broadcast.emit("add_to_chat", { from: { name: "/", id: "/" }, msg: `${this.name} has ended their session` }); }
-		delete PLAYER_LIST[id];
+		delete player_list[id];
 
 		console.log(`\nClosed connection: "${id}"`);
 	}
