@@ -25,7 +25,7 @@ let I;
 
 // world
 
-var world = {};
+let world = {};
 
 world.preload = {
 	sub_image_size: 16,
@@ -36,7 +36,7 @@ world.preload = {
 		map    : { src: "./img/map.png"    , margin_x : 1 , margin_y: 1 },
 		player : { src: "./img/player.png" , margin_y : 1 , margin_y: 0 },
 
-		person_base : { src: "./img/person_base.png" , margin_y : 0 , margin_y: 0 , sub_image_size: 300/**/ , sub_image_size_margin: 0 }
+		person_base : { src: "./img/Person_base.png" , margin_y : 0 , margin_y: 0 , sub_image_size: 300/**/ , sub_image_size_margin: 0 }
 	},
 
 	load_atlas() {
