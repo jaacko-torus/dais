@@ -25,7 +25,7 @@ let I;
 
 // world
 
-let world = {};
+var world = {};
 
 world.preload = {
 	sub_image_size: 16,
