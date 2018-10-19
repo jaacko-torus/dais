@@ -5,7 +5,7 @@ class entity {
 
 		this.img = img;
 
-		this.size = 16;
+		this.size = 32;//16;
 	}
 
 	update() {

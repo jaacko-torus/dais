@@ -13,8 +13,8 @@ const chat = {
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width  = 336; // document.body.clientWidth;
-canvas.height = 336; // document.body.clientHeight;
+canvas.width  = 672; //336; // document.body.clientWidth;
+canvas.height = 672; //336; // document.body.clientHeight;
 
 ctx.font = "30px Arial";
 
@@ -33,10 +33,10 @@ world.preload = {
 	img: {},
 
 	meta: { // image data
-		map    : { src: "./img/map.png"    , margin_x : 1 , margin_y: 1 },
-		player : { src: "./img/player.png" , margin_y : 1 , margin_y: 0 },
+		map    : { src: "./img/map.png"    , margin_x : 1 , margin_y: 1 , sub_image_size: 16 },
+		player : { src: "./img/player.png" , margin_y : 1 , margin_y: 0 , sub_image_size: 16 },
 
-		person_base : { src: "./img/Person_base.png" , margin_y : 0 , margin_y: 0 , sub_image_size: 300/**/ , sub_image_size_margin: 0 }
+		person_base : { src: "./img/Person_base.png" , margin_y : 0 , margin_y: 0 , sub_image_size: 320 , sub_image_size_margin: 0 }
 	},
 
 	load_atlas() {
@@ -71,7 +71,6 @@ world.preload = {
 			this.img[name] = [];
 			let size   = this.meta[name].sub_image_size;
 			let margin = this.meta[name].sub_image_size_margin;
-			console.log(this.img[name]);
 			
 			for(let y = 0; y < this.meta[name].height; y += size + 1) {
 				for(let x = -(size + margin); x < this.meta[name].width; x += size + margin) {
@@ -87,6 +86,7 @@ world.preload = {
 };
 
 world.map = {
+	tile_size: 32,
 	data: [],
 	size: 21,
 
@@ -107,10 +107,10 @@ world.map = {
 				world.preload.img[src][world.map.data[l][y][x]].size,
 				world.preload.img[src][world.map.data[l][y][x]].size,
 
-				I.size * x,
-				I.size * y,
-				I.size,
-				I.size
+				world.map.tile_size * x,
+				world.map.tile_size * y,
+				world.map.tile_size ,
+				world.map.tile_size
 			);
 		},
 
@@ -142,13 +142,13 @@ world.camera = {
 	get size() { return this._size_; }, // must be positive
 	set size(n) { if(Number.isInteger(n) >= 0) { this._size_ = n; return n; } },
 	center: { x: undefined, y: undefined },
-	get area() { return this.size * I.size; },
+	get area() { return this.size * world.map.tile_size; },
 	vector: {x: 0, y: 0},
 
 	transform(data) {
 		ctx.translate(
-			I.size *  this.vector.x,
-			I.size * -this.vector.y
+			world.map.tile_size *  this.vector.x,
+			world.map.tile_size * -this.vector.y
 		);
 
 		world.map.draw();
@@ -156,33 +156,33 @@ world.camera = {
 		ctx.resetTransform();
 	},
 	update() {
-		let px = (I.size * I.x) + (I.size * (world.map.size - 1) / 2); // player x
-		let py = (I.size * I.y) + (I.size * (world.map.size - 1) / 2); // player y
+		let px = (world.map.tile_size * I.x) + (world.map.tile_size * (world.map.size - 1) / 2); // player x
+		let py = (world.map.tile_size * I.y) + (world.map.tile_size * (world.map.size - 1) / 2); // player y
 
 		// since one cannot self reference properties to edit them, `this.center` is to be defined here if not previously done so
-		if( !this.center.x ) { this.center.x = (world.map.size - 1) * I.size / 2; }
-		if( !this.center.y ) { this.center.y = (world.map.size - 1) * I.size / 2; }
+		if( !this.center.x ) { this.center.x = (world.map.size - 1) * world.map.tile_size / 2; }
+		if( !this.center.y ) { this.center.y = (world.map.size - 1) * world.map.tile_size / 2; }
 
 		// setting the bounds of the camera
-		if( px > this.center.x + this.area ) { this.center.x += I.size; this.vector.x += -1; }
-		if( px < this.center.x - this.area ) { this.center.x -= I.size; this.vector.x +=  1; }
-		if( py > this.center.y + this.area ) { this.center.y += I.size; this.vector.y += -1; }
-		if( py < this.center.y - this.area ) { this.center.y -= I.size; this.vector.y +=  1; }
+		if( px > this.center.x + this.area ) { this.center.x += world.map.tile_size; this.vector.x += -1; }
+		if( px < this.center.x - this.area ) { this.center.x -= world.map.tile_size; this.vector.x +=  1; }
+		if( py > this.center.y + this.area ) { this.center.y += world.map.tile_size; this.vector.y += -1; }
+		if( py < this.center.y - this.area ) { this.center.y -= world.map.tile_size; this.vector.y +=  1; }
 	},
 	draw() { // a function for making dashed lines based on grid tiles
 		// FIX: doesn't quite work for any camera, should be more flexible
 		var dashed_line = (x1, y1, x2, y2) => {
 			ctx.beginPath();
 			ctx.setLineDash([2, 1]);
-			ctx.moveTo(x1 * I.size - 0.5, y1 * I.size - 0.5);
-			ctx.lineTo(x2 * I.size - 0.5, y2 * I.size - 0.5);
+			ctx.moveTo(x1 * world.map.tile_size - 0.5, y1 * world.map.tile_size - 0.5);
+			ctx.lineTo(x2 * world.map.tile_size - 0.5, y2 * world.map.tile_size - 0.5);
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = "#686868";
 			ctx.stroke();
 		};
 
-		let low  = -this.size + 10;
-		let high =  this.size + 11;
+		let low  = -world.map.tile_size + 10;
+		let high =  world.map.tile_size + 11;
 
 		dashed_line( low  , low  , low  , high );
 		dashed_line( low  , high , high , high );
@@ -197,16 +197,16 @@ world.grid = {
 		for(let i = 0; i <= world.map.size; i++) {
 			ctx.beginPath();
 			ctx.setLineDash([2, 2]);
-			ctx.moveTo( i * I.size - 0.25, 0             - 0.25 );
-			ctx.lineTo( i * I.size - 0.25, canvas.width  - 0.25 );
+			ctx.moveTo( i * world.map.tile_size - 0.25, 0             - 0.25 );
+			ctx.lineTo( i * world.map.tile_size - 0.25, canvas.width  - 0.25 );
 			ctx.lineWidth = 0.5;
 			ctx.strokeStyle = "#cfcfcf";
 			ctx.stroke();
 
 			ctx.beginPath();
 			ctx.setLineDash([2, 2]);
-			ctx.moveTo( 0             - 0.25, i * I.size - 0.25 );
-			ctx.lineTo( canvas.height - 0.25, i * I.size - 0.25 );
+			ctx.moveTo( 0             - 0.25, i * world.map.tile_size - 0.25 );
+			ctx.lineTo( canvas.height - 0.25, i * world.map.tile_size - 0.25 );
 			ctx.lineWidth = 0.5;
 			ctx.strokeStyle = "#cfcfcf";
 			ctx.stroke();
@@ -233,8 +233,8 @@ world.mouse = {
 		update(evt) {
 			let rect = canvas.getBoundingClientRect();
 			world.mouse.position = {
-				x:  Math.floor( ( evt.clientX - rect.left ) / I.size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
-				y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
+				x:  Math.floor( ( evt.clientX - rect.left ) / world.map.tile_size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
+				y: -Math.floor( ( evt.clientY - rect.top  ) / world.map.tile_size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 			};
 
 			let index_l =  world.map.data.length  - 1;
@@ -259,10 +259,10 @@ world.mouse = {
 		draw(y, x) {
 			ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
 			ctx.fillRect(
-				I.size * x,
-				I.size * y,
-				I.size ,
-				I.size
+				world.map.tile_size * x,
+				world.map.tile_size * y,
+				world.map.tile_size ,
+				world.map.tile_size
 			);
 		}
 	},
@@ -273,8 +273,8 @@ world.mouse = {
 		update(evt) {
 			let rect = canvas.getBoundingClientRect();
 			world.mouse.tile_selected = {
-				x:  Math.floor( ( evt.clientX - rect.left ) / I.size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
-				y: -Math.floor( ( evt.clientY - rect.top  ) / I.size ) + (world.map.size - 1) / 2 - world.camera.vector.y
+				x:  Math.floor( ( evt.clientX - rect.left ) / world.map.tile_size ) - (world.map.size - 1) / 2 - world.camera.vector.x,
+				y: -Math.floor( ( evt.clientY - rect.top  ) / world.map.tile_size ) + (world.map.size - 1) / 2 - world.camera.vector.y
 			};
 
 			let index_l =  world.map.data.length  - 1;
@@ -297,10 +297,10 @@ world.mouse = {
 		draw(y, x) {
 			ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
 			ctx.fillRect(
-				I.size * x ,
-				I.size * y ,
-				I.size ,
-				I.size
+				world.map.tile_size * x,
+				world.map.tile_size * y,
+				world.map.tile_size ,
+				world.map.tile_size
 			);
 		}
 	}
@@ -444,7 +444,7 @@ I = new self(
 	"not connected - no id given",
 	0,
 	0,
-	16,
+	32,
 	1,
 	"" // my_name
 );
