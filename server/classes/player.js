@@ -1,11 +1,10 @@
-const DEBUG  = require("../variables/debug.js");
+const DEBUG = require("../constants/debug.js");
 
-var entity = require("./entity.js");
+let entity = require("./entity.js");
 
-var entity_list = require("../variables/entity_list.js");
-var player_list = require("../variables/player_list.js");
-
-var world  = require("../methods/world.js");
+let world    = require("../methods/world.js");
+let entities = world.entities;
+let players  = world.players;
 
 
 
@@ -38,38 +37,39 @@ class player extends entity {
 	}
 
 	update_spd() {
-		if( this.pressing.left  ) { this.spd_x = -this.spd; }
-		if( this.pressing.up    ) { this.spd_y =  this.spd; }
-		if( this.pressing.right ) { this.spd_x =  this.spd; }
-		if( this.pressing.down  ) { this.spd_y = -this.spd; }
+		if( this.pressing.left  ) { this.spd_x = -this.spd }
+		if( this.pressing.up    ) { this.spd_y =  this.spd }
+		if( this.pressing.right ) { this.spd_x =  this.spd }
+		if( this.pressing.down  ) { this.spd_y = -this.spd }
 
 		if( !( this.pressing.left || this.pressing.right ) ) { this.spd_x = 0; }
 		if( !( this.pressing.up   || this.pressing.down  ) ) { this.spd_y = 0; }
 	}
 
 	on_connect(socket, id) {
-		player_list[id] = this;
+		entities.set(id, this);
+		players.set(id, this);
 
 		socket.on("key_press", (data) => {
-			if( data.input_id === "left"  ) { this.pressing.left  = data.state; }
-			if( data.input_id === "up"    ) { this.pressing.up    = data.state; }
-			if( data.input_id === "right" ) { this.pressing.right = data.state; }
-			if( data.input_id === "down"  ) { this.pressing.down  = data.state; }
+			if( data.input_id === "left"  ) { this.pressing.left  = data.state }
+			if( data.input_id === "up"    ) { this.pressing.up    = data.state }
+			if( data.input_id === "right" ) { this.pressing.right = data.state }
+			if( data.input_id === "down"  ) { this.pressing.down  = data.state }
 		});
-		
+
 		socket.emit("connection", {
 			world : {
 				DEBUG ,
 				map   : world.map   ,
 				size  : world.size  ,
 				layer : world.layer ,
-				msg   : `You are now connected!\nYour session id is now: ${id}`,
+				msg   : `You are now connected!\nYour session id is now: ${id}`
 			},
 			me    : {
 				id    ,
-				x     : this.x      ,
-				y     : this.y      ,
-				size  : this.size   ,
+				x     : this.x     ,
+				y     : this.y     ,
+				size  : this.size  ,
 				img   : this.img
 			},
 		});
@@ -79,8 +79,10 @@ class player extends entity {
 	}
 
 	on_disconnect(socket, id) {
-		if( this.name ) { socket.broadcast.emit("add_to_chat", { from: { name: "/", id: "/" }, msg: `${this.name} has ended their session` }); }
-		delete player_list[id];
+		if( this.name ) { socket.broadcast.emit("add_to_chat", { from: { name: ";", id: ";" }, msg: `${this.name} has ended their session` }) }
+
+		entities.delete(id);
+		players.delete(id);
 
 		console.log(`\nClosed connection: "${id}"`);
 	}
