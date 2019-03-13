@@ -1,20 +1,22 @@
-var PLAYER_LIST = require("../variables/player_list.js");
+let world = require("../methods/world.js");
+let players = world.players;
 
-function update_pckgs() {
+
+function update_pcks() {
 	let pack = {};
-
-	for(let player in PLAYER_LIST) {
-		PLAYER_LIST[player].update();
+	
+	for(let player of world.players.keys()) {
+		world.players.get(player).update();
 
 		pack[player] = {
-			x    : PLAYER_LIST[player].x,
-			y    : PLAYER_LIST[player].y,
-			img  : PLAYER_LIST[player].img,
-			size : PLAYER_LIST[player].size
+			x    : players.get(player).x,
+			y    : players.get(player).y,
+			img  : players.get(player).img,
+			size : players.get(player).size,
 		};
-	}
 
-	return pack;
+		return pack;
+	}
 }
 
-module.exports = update_pckgs;
+module.exports = update_pcks;
